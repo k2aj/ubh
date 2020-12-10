@@ -1,0 +1,5 @@
+_mined-doc/
+*.aux
+*.log
+*.out
+*.synctex.gz
