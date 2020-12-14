@@ -11,3 +11,9 @@ _mined-doc/
 build
 
 !gradle-wrapper.jar
+
+# Eclipse project files
+.classpath
+.project
+.settings/
+app/bin/

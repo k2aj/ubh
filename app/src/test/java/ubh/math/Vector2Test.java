@@ -1,8 +1,7 @@
+package ubh.math;
+
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-
-import ubh.math.Vector2;
-import ubh.math.MathUtil;
 
 public class Vector2Test {
 
