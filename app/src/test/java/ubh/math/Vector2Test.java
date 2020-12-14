@@ -16,6 +16,8 @@ public class Vector2Test {
         assertEquals(new Vector2(-2,-2), a.sub(b));
         assertEquals(new Vector2(6,8), a.mul(2));
         assertEquals(new Vector2(1, 1.3333f), a.div(3));
+        assertEquals(new Vector2(15,24), a.mul(b));
+        assertEquals(new Vector2(3/5f, 4/6f), a.div(b));
     }
 
     @Test

@@ -68,6 +68,12 @@ public final class Vector2 {
     public Vector2 div(float scalar) {
         return new Vector2(x/scalar, y/scalar);
     }
+    public Vector2 mul(Vector2 other) {
+        return new Vector2(x*other.x, y*other.y);
+    }
+    public Vector2 div(Vector2 other) {
+        return new Vector2(x/other.x, y/other.y);
+    }
     /** @return Dot product of this Vector2 and other. */
     public float dot(Vector2 other) {
         return x*other.x + y*other.y;
@@ -81,6 +87,9 @@ public final class Vector2 {
     }
     public Vector2 scaleRotate(float scaleCos, float scaleSin) {
         return new Vector2(x*scaleCos - y*scaleSin, x*scaleSin + y*scaleCos);
+    }
+    public Vector2 scaleRotate(Vector2 newXAxis) {
+    	return scaleRotate(newXAxis.x(), newXAxis.y());
     }
     /** Rotates this Vector2 about [0,0].
      * @param angle How much to rotate, in radians.

@@ -15,6 +15,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.MouseInputListener;
 
 import ubh.math.Vector2;
+import ubh.math.Rectangle;
 
 public final class App extends WindowAdapter implements KeyListener, MouseInputListener, AutoCloseable {
 	
@@ -44,12 +45,19 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
     }
     
     private float time = 0;
+    private Vector2 cursorWorldPos;
+    
+    private Rectangle
+    	r1 = new Rectangle(new Vector2(5,0), new Vector2(24,5), Vector2.polar(0.25f*(float)Math.PI, 1)),
+		r2 = new Rectangle(new Vector2(-5,0), new Vector2(16,7), Vector2.polar(-0.25f*(float)Math.PI, 1));
     
     /** Updates the game's state.
      * @param deltaT How much in-game time has passed since last call to this method.
      */
     private void update(float deltaT) {
     	time += deltaT;
+    	r1.setPosition(cursorWorldPos);
+    	r1.setRotation(Vector2.polar(time/2, 1));
     }
     
     /** Draws game objects, UI, etc.
@@ -57,9 +65,11 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
      */
     private void draw(UBHGraphics g) {
     	g.clear(Color.BLACK);
-    	g.setColor(Color.RED);
-    	g.enableFill();
-        g.drawRotatedRect(g.transformIntoWorldSpace(cursorScreenPos), new Vector2(10,5), Vector2.polar(time, 1));
+    	g.setColor(r1.intersects(r2) ? Color.RED : Color.GREEN);
+    	g.disableFill();
+    	r1.draw(g);
+    	r2.draw(g);
+        
     }
     
     @Override
@@ -79,7 +89,6 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
         while(windowAlive) {
         	final var frameStartTimeMs = System.currentTimeMillis();
         	final var deltaT = Math.min(lastFrameTime, MAX_DELTA_T);
-        	update(deltaT);
         	
         	final var frameSize = frame.getSize();
             final float 
@@ -89,6 +98,8 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
                 (Graphics2D) bufferStrategy.getDrawGraphics(), frameSize,
                 new Vector2(worldWidth, WORLD_HEIGHT)
             )) {
+            	cursorWorldPos = graphics.transformIntoWorldSpace(cursorScreenPos);
+            	update(deltaT);
             	draw(graphics);
             }
         	bufferStrategy.show();
