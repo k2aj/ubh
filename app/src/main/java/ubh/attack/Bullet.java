@@ -3,7 +3,10 @@ package ubh.attack;
 import ubh.Battlefield;
 import ubh.UBHGraphics;
 import ubh.entity.Affiliation;
+import ubh.entity.Living;
+import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
+import ubh.math.Shape;
 
 public class Bullet extends AbstractProjectile {
 
@@ -49,6 +52,18 @@ public class Bullet extends AbstractProjectile {
 			g.setColor(color);
 			g.enableFill();
 			hitbox.draw(g);
+		}
+		
+		@Override
+		public void collide(Battlefield battlefield, Living.Entity entity, Shape hitbox) {
+			super.collide(battlefield, entity, hitbox);
+			if(bouncy) {
+				final var normal = referenceFrame.getPosition().sub(hitbox.getPosition()).normalize();
+				referenceFrame.setVelocity(referenceFrame.getVelocity().reflect(normal));
+				referenceFrame.setRotation(referenceFrame.getVelocity().normalize());
+				if(this.hitbox instanceof Rectangle)
+					((Rectangle) this.hitbox).setRotation(referenceFrame.getRotation());
+			}
 		}
 	}
 }

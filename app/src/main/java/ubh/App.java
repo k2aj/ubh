@@ -20,6 +20,7 @@ import ubh.attack.Bullet;
 import ubh.entity.Affiliation;
 import ubh.entity.Ship;
 import ubh.math.AABB;
+import ubh.math.Circle;
 import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
 
@@ -37,7 +38,11 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 	private static final Ship SHIP = Ship.builder().build();
 	private static final Attack ATTACK = Bullet.builder()
 		.color(Color.CYAN)
-		.hitbox(new Rectangle(Vector2.ZERO, new Vector2(5,2), Vector2.UNIT_X))
+		.damage(1)
+		//.hitbox(new Rectangle(Vector2.ZERO, new Vector2(5,2), Vector2.UNIT_X))
+		.hitbox(new Circle(Vector2.ZERO, 1))
+		.pierce(5)
+		.bouncy(true)
 		.build();
 	
 	private JFrame frame;
