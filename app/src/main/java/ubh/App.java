@@ -15,7 +15,10 @@ import javax.swing.WindowConstants;
 import javax.swing.event.MouseInputListener;
 
 import ubh.math.Vector2;
-import ubh.math.Rectangle;
+import ubh.entity.Affiliation;
+import ubh.entity.Ship;
+import ubh.math.AABB;
+import ubh.math.ReferenceFrame;
 
 public final class App extends WindowAdapter implements KeyListener, MouseInputListener, AutoCloseable {
 	
@@ -28,6 +31,7 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 	private static final float 
 		MAX_DELTA_T = 1/20f,
 		WORLD_HEIGHT = 72;
+	private static final Ship PLAYER_SHIP = Ship.builder().build();
 	
 	private JFrame frame;
     
@@ -42,22 +46,29 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
         frame.addMouseListener(this);
         frame.addMouseMotionListener(this);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        
+        battlefield = new Battlefield(AABB.centered(Vector2.ZERO, new Vector2(WORLD_HEIGHT*2, WORLD_HEIGHT)));
+        playerShipEntity = PLAYER_SHIP.createEntity(new ReferenceFrame(Vector2.ZERO), Affiliation.FRIENDLY);
+        battlefield.spawn(playerShipEntity, 0);
     }
     
     private float time = 0;
     private Vector2 cursorWorldPos;
-    
-    private Rectangle
-    	r1 = new Rectangle(new Vector2(5,0), new Vector2(24,5), Vector2.polar(0.25f*(float)Math.PI, 1)),
-		r2 = new Rectangle(new Vector2(-5,0), new Vector2(16,7), Vector2.polar(-0.25f*(float)Math.PI, 1));
+    private Battlefield battlefield;
+    private Ship.Entity playerShipEntity;
     
     /** Updates the game's state.
      * @param deltaT How much in-game time has passed since last call to this method.
      */
     private void update(float deltaT) {
-    	time += deltaT;
-    	r1.setPosition(cursorWorldPos);
-    	r1.setRotation(Vector2.polar(time/2, 1));
+    	battlefield.update(deltaT);
+    	if(!playerShipEntity.isDead()) {
+    		final var thrust = new Vector2(
+	            (keyboard.getOrDefault('D',false) ? 1 : 0) + (keyboard.getOrDefault('A',false) ? -1 : 0),
+	            (keyboard.getOrDefault('W',false) ? 1 : 0) + (keyboard.getOrDefault('S',false) ? -1 : 0)
+            );
+    		playerShipEntity.getReferenceFrame().setVelocity(thrust.length2() == 0 ? Vector2.ZERO : thrust.scaleTo(shiftPressed ? 10 : 20));
+    	}
     }
     
     /** Draws game objects, UI, etc.
@@ -65,11 +76,7 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
      */
     private void draw(UBHGraphics g) {
     	g.clear(Color.BLACK);
-    	g.setColor(r1.intersects(r2) ? Color.RED : Color.GREEN);
-    	g.disableFill();
-    	r1.draw(g);
-    	r2.draw(g);
-        
+    	battlefield.draw(g);
     }
     
     @Override
