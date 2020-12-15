@@ -3,7 +3,9 @@ package ubh.attack;
 import java.awt.Color;
 
 import ubh.Battlefield;
+import ubh.Collider;
 import ubh.entity.Affiliation;
+import ubh.entity.Living;
 import ubh.entity.LocalEntity;
 import ubh.math.Circle;
 import ubh.math.Rectangle;
@@ -59,18 +61,48 @@ public abstract class AbstractProjectile implements Attack {
 		}
     }
     
-    public abstract class Entity extends LocalEntity {
+    public abstract class Entity extends LocalEntity implements Collider {
     	
     	protected final Affiliation affiliation;
     	protected final Shape hitbox;
     	protected boolean outOfBounds = false;
+    	protected float lifetime = 0;
+    	protected int pierce;
+    	private AutoCloseable collider;
 
 		protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 			super(referenceFrame);
 			this.affiliation = affiliation;
 			this.hitbox = AbstractProjectile.this.hitbox.deepCopy();
+			this.pierce = AbstractProjectile.this.pierce;
 			if(this.hitbox instanceof Rectangle)
 				((Rectangle) this.hitbox).setRotation(referenceFrame.getRotation());
+		}
+		
+		@Override
+		public void onSpawned(Battlefield battlefield) {
+			collider = battlefield.getCollisionSystem().registerCollider(this, hitbox, affiliation);
+		}
+		
+		@Override
+		public void onDespawned(Battlefield battlefield) {
+			// Destroy collider
+			if(collider != null)
+				try {
+					// This should never throw
+					collider.close();
+				} catch(Exception e) {
+					throw new Error("This should never happen", e);
+				}
+		}
+		
+		@Override
+		public void collide(Battlefield battlefield, Living.Entity entity, Shape hitbox) {
+			if(pierce != 0) {
+				entity.damage(damage);
+				if(pierce > 0)
+					--pierce;
+			}
 		}
 		
 		@Override
@@ -79,11 +111,12 @@ public abstract class AbstractProjectile implements Attack {
 			hitbox.setPosition(referenceFrame.getPosition());
 			if(!battlefield.inBounds(hitbox))
 				outOfBounds = true;
+			lifetime += deltaT;
 		}
 
 		@Override
 		public boolean isDead() {
-			return outOfBounds;
+			return outOfBounds || lifetime >= maxLifetime || pierce == 0;
 		}
     }
 }

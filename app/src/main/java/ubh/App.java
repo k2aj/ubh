@@ -34,7 +34,7 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 	private static final float 
 		MAX_DELTA_T = 1/20f,
 		WORLD_HEIGHT = 72;
-	private static final Ship PLAYER_SHIP = Ship.builder().build();
+	private static final Ship SHIP = Ship.builder().build();
 	private static final Attack ATTACK = Bullet.builder()
 		.color(Color.CYAN)
 		.hitbox(new Rectangle(Vector2.ZERO, new Vector2(5,2), Vector2.UNIT_X))
@@ -55,8 +55,20 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         battlefield = new Battlefield(AABB.centered(Vector2.ZERO, new Vector2(WORLD_HEIGHT*2, WORLD_HEIGHT)));
-        playerShipEntity = PLAYER_SHIP.createEntity(new ReferenceFrame(Vector2.ZERO), Affiliation.FRIENDLY);
+        playerShipEntity = SHIP.createEntity(new ReferenceFrame(Vector2.ZERO), Affiliation.FRIENDLY);
         battlefield.spawn(playerShipEntity, 0);
+        
+        for(int i=0; i<20; ++i)
+        	SHIP.attack(
+        		battlefield, 
+        		new ReferenceFrame(new Vector2(
+        			((float) Math.random() - 0.5f)*2*WORLD_HEIGHT, 
+        			WORLD_HEIGHT*(float) Math.random())
+        		),
+        		Affiliation.ENEMY, 
+        		0
+        	);
+        
     }
     
     private float time = 0;
@@ -77,7 +89,7 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
     		playerShipEntity.getReferenceFrame().setVelocity(thrust.length2() == 0 ? Vector2.ZERO : thrust.scaleTo(shiftPressed ? 10 : 20));
     		if(mouseButtonPressed[1]) {
     			final var rframe = playerShipEntity.getReferenceFrame().deepCopy();
-    			rframe.setVelocity((cursorWorldPos.sub(rframe.getVelocity())).scaleTo(30));
+    			rframe.setVelocity((cursorWorldPos.sub(rframe.getPosition())).scaleTo(30));
     			rframe.setRotation(rframe.getVelocity().normalize());
     			ATTACK.attack(battlefield, rframe, Affiliation.FRIENDLY, 0);
     		}

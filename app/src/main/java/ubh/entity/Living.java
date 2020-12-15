@@ -51,6 +51,7 @@ public abstract class Living implements Attack {
 	    private float health;
 	    protected final Shape hitbox;
 	    protected final Affiliation affiliation;
+	    private AutoCloseable collider;
 	
 	    protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 	        super(referenceFrame);
@@ -58,6 +59,11 @@ public abstract class Living implements Attack {
 	        this.hitbox = Living.this.hitbox.deepCopy();
 	        this.affiliation = affiliation;
 	    }
+	    
+		@Override
+		public void onSpawned(Battlefield battlefield) {
+			collider = battlefield.getCollisionSystem().registerEntity(this, hitbox, affiliation);
+		}
 	
 	    @Override
 	    public void onDespawned(Battlefield battlefield) {
@@ -66,6 +72,15 @@ public abstract class Living implements Attack {
 	    	 */
 	        if(getCurrentHealth() <= 0)
 	            deathAttack.attack(battlefield, referenceFrame, affiliation, 0);
+	        
+	        // Destroy collider
+	        if(collider != null)
+				try {
+					// This should never throw
+					collider.close();
+				} catch(Exception e) {
+					throw new Error("This should never happen", e);
+				}
 	    }
 	
 	    @Override

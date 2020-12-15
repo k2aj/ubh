@@ -11,6 +11,7 @@ public class Battlefield {
 	    entities = new ArrayList<>(),
 	    newEntities = new ArrayList<>();
 	private final Shape bounds;
+	private final CollisionSystem collisionSystem = new CollisionSystem();
 	
 	public Battlefield(Shape bounds) {
 		this.bounds = bounds;
@@ -27,6 +28,8 @@ public class Battlefield {
 		// Update state of existing entities
 		for(var e : entities) 
 			e.update(this, deltaT);
+		collisionSystem.update(deltaT);
+		collisionSystem.runCollisions(this);
 		
 		// Remove dead entities
 		for(var e : entities)
@@ -53,5 +56,8 @@ public class Battlefield {
 	}
 	public boolean inBounds(Vector2 point) {
 		return bounds.contains(point);
+	}
+	public CollisionSystem getCollisionSystem() {
+		return collisionSystem;
 	}
 }
