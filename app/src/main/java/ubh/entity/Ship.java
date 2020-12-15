@@ -7,7 +7,7 @@ import ubh.math.ReferenceFrame;
 
 public class Ship extends Living {
 	
-	public Ship(Builder<?> builder) {
+	protected Ship(Builder<?> builder) {
 		super(builder);
 	}
 	public static Builder<?> builder() {
@@ -28,7 +28,7 @@ public class Ship extends Living {
 	
     public class Entity extends Living.Entity {
 
-		public Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
+		protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 			super(referenceFrame, affiliation);
 		}
 		@Override

@@ -13,7 +13,7 @@ public abstract class Living implements Attack {
 	protected final Shape hitbox;
 	protected final Attack deathAttack;
 	
-	public Living(Builder<?> builder) {
+	protected Living(Builder<?> builder) {
 		maxHealth = builder.maxHealth;
 		hitbox = builder.hitbox.deepCopy();
 		deathAttack = builder.deathAttack;
@@ -52,7 +52,7 @@ public abstract class Living implements Attack {
 	    protected final Shape hitbox;
 	    protected final Affiliation affiliation;
 	
-	    public Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
+	    protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 	        super(referenceFrame);
 	        this.health = maxHealth;
 	        this.hitbox = Living.this.hitbox.deepCopy();
