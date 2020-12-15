@@ -15,11 +15,6 @@ public class Ship extends Living {
     }
     @SuppressWarnings("unchecked") 
     public static class Builder <This extends Builder<This>> extends Living.Builder<This> {
-        protected float someProperty;
-        public This someProperty(float someProperty) {
-            this.someProperty = someProperty;
-            return (This) this;
-        }
 		@Override
 		public Ship build() {
 			return new Ship(this);

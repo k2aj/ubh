@@ -15,9 +15,12 @@ import javax.swing.WindowConstants;
 import javax.swing.event.MouseInputListener;
 
 import ubh.math.Vector2;
+import ubh.attack.Attack;
+import ubh.attack.Bullet;
 import ubh.entity.Affiliation;
 import ubh.entity.Ship;
 import ubh.math.AABB;
+import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
 
 public final class App extends WindowAdapter implements KeyListener, MouseInputListener, AutoCloseable {
@@ -32,6 +35,10 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 		MAX_DELTA_T = 1/20f,
 		WORLD_HEIGHT = 72;
 	private static final Ship PLAYER_SHIP = Ship.builder().build();
+	private static final Attack ATTACK = Bullet.builder()
+		.color(Color.CYAN)
+		.hitbox(new Rectangle(Vector2.ZERO, new Vector2(5,2), Vector2.UNIT_X))
+		.build();
 	
 	private JFrame frame;
     
@@ -68,6 +75,12 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 	            (keyboard.getOrDefault('W',false) ? 1 : 0) + (keyboard.getOrDefault('S',false) ? -1 : 0)
             );
     		playerShipEntity.getReferenceFrame().setVelocity(thrust.length2() == 0 ? Vector2.ZERO : thrust.scaleTo(shiftPressed ? 10 : 20));
+    		if(mouseButtonPressed[1]) {
+    			final var rframe = playerShipEntity.getReferenceFrame().deepCopy();
+    			rframe.setVelocity((cursorWorldPos.sub(rframe.getVelocity())).scaleTo(30));
+    			rframe.setRotation(rframe.getVelocity().normalize());
+    			ATTACK.attack(battlefield, rframe, Affiliation.FRIENDLY, 0);
+    		}
     	}
     }
     

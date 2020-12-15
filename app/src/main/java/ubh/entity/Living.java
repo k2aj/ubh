@@ -25,15 +25,15 @@ public abstract class Living implements Attack {
         protected Shape hitbox = AABB.centered(Vector2.ZERO, new Vector2(5,5));
         protected Attack deathAttack = Attack.NULL;
 
-        public This setMaxHealth(float maxHealth) {
+        public This maxHealth(float maxHealth) {
             this.maxHealth = maxHealth;
             return (This) this;
         }
-        public This setHitbox(Shape hitbox) {
+        public This hitbox(Shape hitbox) {
             this.hitbox = hitbox;
             return (This) this;
         }
-        public This setDeathAttack(Attack deathAttack) {
+        public This deathAttack(Attack deathAttack) {
         	this.deathAttack = deathAttack;
             return (This) this;
         }
