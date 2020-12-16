@@ -1,6 +1,10 @@
 package ubh.math;
 
+import org.hjson.JsonValue;
+
 import ubh.UBHGraphics;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 
 public final class Circle implements Shape {
 
@@ -58,5 +62,28 @@ public final class Circle implements Shape {
 		if(radius < 0)
 			throw new IllegalArgumentException("Negative radius");
 		this.radius = radius;
+	}
+	
+	public static Circle fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
+		float x=0, y=0, r=5;
+		for(var member : json.asObject()) {
+			switch(member.getName()) {
+			case "center":
+				var center = registry.load(Vector2.class, member.getValue());
+				x = center.x();
+				y = center.y();
+				break;
+			case "x":
+				x = member.getValue().asFloat();
+				break;
+			case "y":
+				y = member.getValue().asFloat();
+				break;
+			case "radius":
+				r = member.getValue().asFloat();
+				break;
+			}
+		}
+		return new Circle(new Vector2(x,y),r);
 	}
 }

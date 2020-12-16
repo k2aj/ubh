@@ -2,7 +2,11 @@ package ubh.entity;
 
 import java.awt.Color;
 
+import org.hjson.JsonValue;
+
 import ubh.UBHGraphics;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 import ubh.math.ReferenceFrame;
 
 public class Ship extends Living {
@@ -39,5 +43,8 @@ public class Ship extends Living {
 		}
     }
 
+    public static Ship fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
+    	return builder().loadJson(registry, json).build();
+    }
 
 }

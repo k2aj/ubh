@@ -1,6 +1,10 @@
 package ubh.math;
 
+import org.hjson.JsonValue;
+
 import ubh.UBHGraphics;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 
 public final class Rectangle implements Shape {
 
@@ -91,5 +95,30 @@ public final class Rectangle implements Shape {
     @Override
     public Rectangle deepCopy() {
         return new Rectangle(bounds.getPosition(), bounds.getRadii(), rotation);
+    }
+    public static Rectangle fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
+    	float x=0, y=0, rx=5, ry=5, cos=1, sin=0;
+		for(var member : json.asObject()) {
+			switch(member.getName()) {
+			case "center":
+				var center = registry.load(Vector2.class, member.getValue());
+				x = center.x();
+				y = center.y();
+				break;
+			case "x":
+				x = member.getValue().asFloat();
+				break;
+			case "y":
+				y = member.getValue().asFloat();
+				break;
+			case "width":
+				rx = 0.5f*member.getValue().asFloat();
+				break;
+			case "height":
+				ry = 0.5f*member.getValue().asFloat();
+				break;
+			}
+		}
+		return new Rectangle(new Vector2(x,y),new Vector2(rx,ry),new Vector2(cos,sin));
     }
 }

@@ -16,12 +16,10 @@ import javax.swing.event.MouseInputListener;
 
 import ubh.math.Vector2;
 import ubh.attack.Attack;
-import ubh.attack.Bullet;
 import ubh.entity.Affiliation;
 import ubh.entity.Ship;
+import ubh.loader.ContentRegistry;
 import ubh.math.AABB;
-import ubh.math.Circle;
-import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
 
 public final class App extends WindowAdapter implements KeyListener, MouseInputListener, AutoCloseable {
@@ -35,18 +33,13 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 	private static final float 
 		MAX_DELTA_T = 1/20f,
 		WORLD_HEIGHT = 72;
-	private static final Ship SHIP = Ship.builder().build();
-	private static final Attack ATTACK = Bullet.builder()
-		.color(Color.CYAN)
-		.damage(1)
-		//.hitbox(new Rectangle(Vector2.ZERO, new Vector2(5,2), Vector2.UNIT_X))
-		.hitbox(new Circle(Vector2.ZERO, 1))
-		.pierce(5)
-		.bouncy(true)
-		.build();
 	
-	private JFrame frame;
-    
+	private final JFrame frame;
+	private static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
+	
+	private static final Attack ATTACK = REGISTRY.loadFromResource(Attack.class, App.class, "example_bullet.hjson");
+	private static final Ship SHIP = REGISTRY.loadFromResource(Ship.class, App.class, "example_ship.hjson");
+	
     private App(int width, int height) {
     	// Setup window
     	frame = new JFrame();

@@ -1,9 +1,13 @@
 package ubh.attack;
 
+import org.hjson.JsonValue;
+
 import ubh.Battlefield;
 import ubh.UBHGraphics;
 import ubh.entity.Affiliation;
 import ubh.entity.Living;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
 import ubh.math.Shape;
@@ -39,6 +43,12 @@ public class Bullet extends AbstractProjectile {
 			this.bouncy = bouncy;
 			return (This) this;
 		}
+		
+		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+			if(field.equals("bouncy"))
+				bouncy = json.asBoolean();
+			else super.loadFieldFromJson(field, registry, json);
+		}
     }
 	
 	public class Entity extends AbstractProjectile.Entity {
@@ -65,5 +75,9 @@ public class Bullet extends AbstractProjectile {
 					((Rectangle) this.hitbox).setRotation(referenceFrame.getRotation());
 			}
 		}
+	}
+	
+	public static Bullet fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
+		return builder().loadJson(registry, json).build();
 	}
 }

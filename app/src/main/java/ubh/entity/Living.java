@@ -4,8 +4,13 @@ import ubh.math.Shape;
 import ubh.math.Vector2;
 import ubh.math.AABB;
 import ubh.math.ReferenceFrame;
+
+import org.hjson.JsonValue;
+
 import ubh.Battlefield;
 import ubh.attack.Attack;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 
 public abstract class Living implements Attack {
 	
@@ -38,6 +43,20 @@ public abstract class Living implements Attack {
             return (This) this;
         }
         public abstract Living build();
+        
+        protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+			switch(field) {
+				case "maxHealth": 	maxHealth(json.asFloat()); 	 			  		 break;
+				case "deathAttack":	deathAttack(registry.load(Attack.class, json));  break;
+				case "hitbox":		hitbox(registry.load(Shape.class, json)); 		 break;
+			}
+		}
+        
+        protected This loadJson(ContentRegistry registry, JsonValue json) throws ContentException {
+			for(var member : json.asObject())
+				loadFieldFromJson(member.getName(), registry, member.getValue());
+			return (This) this;
+		}
     }
     
     public abstract Entity createEntity(ReferenceFrame referenceFrame, Affiliation affiliation);

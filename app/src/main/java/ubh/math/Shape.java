@@ -1,6 +1,10 @@
 package ubh.math;
 
+import org.hjson.JsonValue;
+
 import ubh.UBHGraphics;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 
 public interface Shape {
 	
@@ -32,4 +36,12 @@ public interface Shape {
     
     /** @return Deep copy of this Shape. */
     public Shape deepCopy();
+    
+    public static Shape fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
+    	for(var name : json.asObject().names()) {
+    		if(name.equals("radius"))
+    			return Circle.fromJson(registry, json);
+    	}
+    	return Rectangle.fromJson(registry, json);
+    }
 }

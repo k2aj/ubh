@@ -2,11 +2,15 @@ package ubh.attack;
 
 import java.awt.Color;
 
+import org.hjson.JsonValue;
+
 import ubh.Battlefield;
 import ubh.Collider;
 import ubh.entity.Affiliation;
 import ubh.entity.Living;
 import ubh.entity.LocalEntity;
+import ubh.loader.ContentException;
+import ubh.loader.ContentRegistry;
 import ubh.math.Circle;
 import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
@@ -57,6 +61,20 @@ public abstract class AbstractProjectile implements Attack {
 		}
 		public This hitbox(Shape hitbox) {
 			this.hitbox = hitbox.deepCopy();
+			return (This) this;
+		}
+		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+			switch(field) {
+				case "damage": 		damage(json.asFloat()); 	 			  break;
+				case "maxLifetime": maxLifetime(json.asFloat()); 			  break;
+				case "pierce":		pierce((int)json.asFloat()); 		      break;
+				case "color":		color(registry.load(Color.class, json));  break;
+				case "hitbox":		hitbox(registry.load(Shape.class, json)); break;
+			}
+		}
+		protected This loadJson(ContentRegistry registry, JsonValue json) throws ContentException {
+			for(var member : json.asObject())
+				loadFieldFromJson(member.getName(), registry, member.getValue());
 			return (This) this;
 		}
     }

@@ -1,0 +1,8 @@
+type: Bullet
+color: yellow
+damage: 1
+hitbox: {
+    radius: 1
+}
+pierce: 5
+bouncy: true

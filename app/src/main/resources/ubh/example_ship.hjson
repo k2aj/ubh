@@ -1,0 +1,4 @@
+type: Ship
+hitbox: {
+	radius: 5
+}

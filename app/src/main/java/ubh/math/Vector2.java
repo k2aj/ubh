@@ -1,5 +1,9 @@
 package ubh.math;
 
+import org.hjson.JsonValue;
+
+import ubh.loader.ContentRegistry;
+
 /** Represents a 2D floating point vector.
  *  Vector2 is immutable; methods such as normalize() etc. return new instances of Vector2 instead of mutating the current instance.
  */
@@ -119,5 +123,15 @@ public final class Vector2 {
     @Override
     public String toString() {
         return String.format("[%.3f, %.3f]", x, y);
+    }
+    
+    public static Vector2 fromJson(ContentRegistry registry, JsonValue json) {
+    	if(json.isObject()) {
+			var obj = json.asObject();
+			return new Vector2(obj.getFloat("x", 0), obj.getFloat("y", 0));
+		} else {
+			var arr = json.asArray();
+			return new Vector2(arr.get(0).asFloat(), arr.get(1).asFloat());
+		}
     }
 }
