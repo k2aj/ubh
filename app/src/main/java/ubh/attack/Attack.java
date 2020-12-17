@@ -1,5 +1,7 @@
 package ubh.attack;
 
+import java.util.List;
+
 import ubh.Battlefield;
 import ubh.math.ReferenceFrame;
 import ubh.entity.Affiliation;
@@ -16,4 +18,8 @@ public interface Attack {
 
     /** NULL Attack does nothing.*/
     public static final Attack NULL = (a,b,c,d) -> {};
+    
+    public static Attack combine(Attack... attacks) {
+    	return new MultiAttack(List.of(attacks));
+    }
 }

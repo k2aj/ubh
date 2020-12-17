@@ -1,23 +1,54 @@
-type: Bullet
-color: yellow
-damage: 1
-hitbox: {
-	width: 4
-    height: 1
-}
-pierce: 5
-bouncy: true
+type: SpreadAttack
 
-hitAttack: {
-    type: Explosion
-    color: yellow
-    radius: 5
-    damage: 1
-}
+randomWeight: 0.3
 
-pierceDepletedAttack: {
-	type: Explosion
+attack: {
+	type: Bullet
 	color: yellow
-	radius: 15
 	damage: 1
+	pierce: 5
+	bouncy: true
+	
+	// Hitbox type inference
+	hitbox: {
+		width: 4
+	    height: 1
+	}
+	
+	// Array of attacks converts to MultiAttack
+	hitAttack: [
+		{
+			type: SpreadAttack
+			
+			spreadWeight: 1
+			spreadAngle: 90
+			baseWeight: 0
+			
+			repeats: 7
+			attack: {
+				type: Bullet
+				color: cyan
+				hitbox: {
+					radius: 1
+				}
+				damage: 1
+				pierce: 10
+				bouncy: false
+				maxLifetime: 1
+			}
+		},
+		{
+		    type: Explosion
+		    color: magenta
+		    radius: 7
+		    damage: 1
+		}
+	]
+	
+	pierceDepletedAttack: {
+		type: Explosion
+		color: yellow
+		radius: 15
+		damage: 1
+	}
 }

@@ -3,7 +3,9 @@ package ubh.loader;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hjson.JsonValue;
@@ -194,8 +196,11 @@ public final class ContentRegistry {
 		
 		// ubh.attack
 		registry.registerDefault(Attack.class, Attack.NULL);
+		registry.registerLoader(Attack.class, MultiAttack::fromJsonArray);
 		registry.registerLoader("Bullet", Bullet::fromJson);
 		registry.registerLoader("Explosion", Explosion::fromJson);
+		registry.registerLoader("SpreadAttack", SpreadAttack::fromJson);
+		registry.registerLoader("MultiAttack", MultiAttack::fromJson);
 		
 		// ubh.entity
 		registry.registerLoader("Ship", Ship::fromJson);
