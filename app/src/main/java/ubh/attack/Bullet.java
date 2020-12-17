@@ -49,6 +49,11 @@ public class Bullet extends AbstractProjectile {
 			return (This) this;
 		}
 		
+		public This hitbox(Shape hitbox) {
+			this.hitbox = hitbox;
+			return (This) this;
+		}
+		
 		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
 				case "bouncy": bouncy = json.asBoolean(); break;

@@ -2,10 +2,11 @@ type: Bullet
 color: yellow
 damage: 1
 hitbox: {
-    radius: 1
+	width: 4
+    height: 1
 }
 pierce: 5
-bouncy: false
+bouncy: true
 
 hitAttack: {
     type: Explosion

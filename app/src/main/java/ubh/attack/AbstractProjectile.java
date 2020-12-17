@@ -43,7 +43,6 @@ public abstract class AbstractProjectile implements Attack {
 			maxLifetime = 10;
 		private int pierce = 1;
 		private Color color = Color.WHITE;
-		private Shape hitbox = new Circle(Vector2.ZERO, 5);
 		private Attack 
 			hitAttack = Attack.NULL,
 			pierceDepletedAttack = Attack.NULL;
@@ -64,10 +63,6 @@ public abstract class AbstractProjectile implements Attack {
 		}
 		public This color(Color color) {
 			this.color = color;
-			return (This) this;
-		}
-		public This hitbox(Shape hitbox) {
-			this.hitbox = hitbox.deepCopy();
 			return (This) this;
 		}
 		public This hitAttack(Attack attack) {
