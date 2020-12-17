@@ -22,14 +22,18 @@ public abstract class AbstractProjectile implements Attack {
 	protected final float damage, maxLifetime;
 	protected final int pierce;
 	protected final Color color;
-	protected final Shape hitbox;
+	
+	protected final Attack 
+		hitAttack,
+		pierceDepletedAttack;
 	
 	protected AbstractProjectile (Builder<?> builder) {
 		this.damage = builder.damage;
 		this.maxLifetime = builder.maxLifetime;
 		this.pierce = builder.pierce;
 		this.color = builder.color;
-		this.hitbox = builder.hitbox.deepCopy();
+		this.hitAttack = builder.hitAttack;
+		this.pierceDepletedAttack = builder.pierceDepletedAttack;
 	}
 
     @SuppressWarnings("unchecked") 
@@ -40,6 +44,9 @@ public abstract class AbstractProjectile implements Attack {
 		private int pierce = 1;
 		private Color color = Color.WHITE;
 		private Shape hitbox = new Circle(Vector2.ZERO, 5);
+		private Attack 
+			hitAttack = Attack.NULL,
+			pierceDepletedAttack = Attack.NULL;
 		
 		public abstract AbstractProjectile build();
 		
@@ -63,13 +70,22 @@ public abstract class AbstractProjectile implements Attack {
 			this.hitbox = hitbox.deepCopy();
 			return (This) this;
 		}
+		public This hitAttack(Attack attack) {
+			hitAttack = attack;
+			return (This) this;
+		}
+		public This pierceDepletedAttack(Attack attack) {
+			pierceDepletedAttack = attack;
+			return (This) this;
+		}
 		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
-				case "damage": 		damage(json.asFloat()); 	 			  break;
-				case "maxLifetime": maxLifetime(json.asFloat()); 			  break;
-				case "pierce":		pierce((int)json.asFloat()); 		      break;
-				case "color":		color(registry.load(Color.class, json));  break;
-				case "hitbox":		hitbox(registry.load(Shape.class, json)); break;
+				case "damage": 		damage(json.asFloat()); 	 			      break;
+				case "maxLifetime": maxLifetime(json.asFloat()); 			      break;
+				case "pierce":		pierce((int)json.asFloat()); 		          break;
+				case "color":		color(registry.load(Color.class, json));      break;
+				case "hitAttack":   hitAttack(registry.load(Attack.class, json)); break;
+				case "pierceDepletedAttack": pierceDepletedAttack(registry.load(Attack.class, json)); break;
 			}
 		}
 		protected This loadJson(ContentRegistry registry, JsonValue json) throws ContentException {
@@ -82,7 +98,6 @@ public abstract class AbstractProjectile implements Attack {
     public abstract class Entity extends LocalEntity implements Collider {
     	
     	protected final Affiliation affiliation;
-    	protected final Shape hitbox;
     	protected boolean outOfBounds = false;
     	protected float lifetime = 0;
     	protected int pierce;
@@ -91,15 +106,14 @@ public abstract class AbstractProjectile implements Attack {
 		protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 			super(referenceFrame);
 			this.affiliation = affiliation;
-			this.hitbox = AbstractProjectile.this.hitbox.deepCopy();
 			this.pierce = AbstractProjectile.this.pierce;
-			if(this.hitbox instanceof Rectangle)
-				((Rectangle) this.hitbox).setRotation(referenceFrame.getRotation());
 		}
+		
+		protected abstract Shape getHitbox();
 		
 		@Override
 		public void onSpawned(Battlefield battlefield) {
-			collider = battlefield.getCollisionSystem().registerCollider(this, hitbox, affiliation);
+			collider = battlefield.getCollisionSystem().registerCollider(this, getHitbox(), affiliation);
 		}
 		
 		@Override
@@ -118,16 +132,19 @@ public abstract class AbstractProjectile implements Attack {
 		public void collide(Battlefield battlefield, Living.Entity entity, Shape hitbox) {
 			if(pierce != 0) {
 				entity.damage(damage);
-				if(pierce > 0)
+				hitAttack.attack(battlefield, referenceFrame, affiliation, 0);
+				if(pierce > 0) {
 					--pierce;
+					if(pierce == 0)
+						pierceDepletedAttack.attack(battlefield, referenceFrame, affiliation, 0);
+				}
 			}
 		}
 		
 		@Override
 		public void update(Battlefield battlefield, float deltaT) {
 			super.update(battlefield, deltaT);
-			hitbox.setPosition(referenceFrame.getPosition());
-			if(!battlefield.inBounds(hitbox))
+			if(!battlefield.inBounds(getHitbox()))
 				outOfBounds = true;
 			lifetime += deltaT;
 		}

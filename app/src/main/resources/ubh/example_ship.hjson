@@ -2,3 +2,9 @@ type: Ship
 hitbox: {
 	radius: 5
 }
+
+deathAttack: {
+	type: Explosion
+	radius: 15
+	color: white
+}

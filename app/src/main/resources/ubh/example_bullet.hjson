@@ -5,4 +5,18 @@ hitbox: {
     radius: 1
 }
 pierce: 5
-bouncy: true
+bouncy: false
+
+hitAttack: {
+    type: Explosion
+    color: yellow
+    radius: 5
+    damage: 1
+}
+
+pierceDepletedAttack: {
+	type: Explosion
+	color: yellow
+	radius: 15
+	damage: 1
+}

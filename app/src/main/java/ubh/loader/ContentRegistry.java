@@ -192,9 +192,12 @@ public final class ContentRegistry {
 		registry.registerLoader("Circle", Circle::fromJson);
 		registry.registerLoader("Rectangle", Rectangle::fromJson);
 		
-		// ubh.attack, ubh.entity
+		// ubh.attack
 		registry.registerDefault(Attack.class, Attack.NULL);
 		registry.registerLoader("Bullet", Bullet::fromJson);
+		registry.registerLoader("Explosion", Explosion::fromJson);
+		
+		// ubh.entity
 		registry.registerLoader("Ship", Ship::fromJson);
 		
 		return registry;
