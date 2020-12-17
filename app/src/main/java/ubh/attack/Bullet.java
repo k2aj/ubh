@@ -53,8 +53,8 @@ public class Bullet extends AbstractProjectile {
 			this.hitbox = hitbox;
 			return (This) this;
 		}
-		
-		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+		@Override
+		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
 				case "bouncy": bouncy = json.asBoolean(); break;
 				case "hitbox": hitbox(registry.load(Shape.class, json)); break;
@@ -106,6 +106,8 @@ public class Bullet extends AbstractProjectile {
 	}
 	
 	public static Bullet fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
-		return builder().loadJson(registry, json).build();
+		var builder = builder();
+		builder.loadJson(registry, json);
+		return builder.build();
 	}
 }

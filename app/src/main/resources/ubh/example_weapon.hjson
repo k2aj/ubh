@@ -1,0 +1,14 @@
+maxAmmo: 3
+fireRate: 10
+reloadTime: 0.5
+velocity: 50
+attack: {
+	type: Bullet
+	color: cyan
+	hitbox: {
+		radius: 1
+	}
+	bouncy: true
+	pierce: 10
+	damage: 10
+}

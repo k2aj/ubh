@@ -11,6 +11,7 @@ import ubh.Battlefield;
 import ubh.attack.Attack;
 import ubh.loader.ContentException;
 import ubh.loader.ContentRegistry;
+import ubh.loader.JsonLoadable;
 
 public abstract class Living implements Attack {
 	
@@ -25,7 +26,7 @@ public abstract class Living implements Attack {
 	}
 	
     @SuppressWarnings("unchecked")
-    public static abstract class Builder<This extends Builder<This>> {
+    public static abstract class Builder<This extends Builder<This>> implements JsonLoadable {
         protected float maxHealth = 1000;
         protected Shape hitbox = AABB.centered(Vector2.ZERO, new Vector2(5,5));
         protected Attack deathAttack = Attack.NULL;
@@ -44,18 +45,13 @@ public abstract class Living implements Attack {
         }
         public abstract Living build();
         
-        protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+        @Override
+        public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
 				case "maxHealth": 	maxHealth(json.asFloat()); 	 			  		 break;
 				case "deathAttack":	deathAttack(registry.load(Attack.class, json));  break;
 				case "hitbox":		hitbox(registry.load(Shape.class, json)); 		 break;
 			}
-		}
-        
-        protected This loadJson(ContentRegistry registry, JsonValue json) throws ContentException {
-			for(var member : json.asObject())
-				loadFieldFromJson(member.getName(), registry, member.getValue());
-			return (This) this;
 		}
     }
     

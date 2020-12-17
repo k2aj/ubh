@@ -16,6 +16,7 @@ import javax.swing.event.MouseInputListener;
 
 import ubh.math.Vector2;
 import ubh.attack.Attack;
+import ubh.attack.Weapon;
 import ubh.entity.Affiliation;
 import ubh.entity.Ship;
 import ubh.loader.ContentRegistry;
@@ -39,6 +40,7 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 	
 	private static final Attack ATTACK = REGISTRY.loadFromResource(Attack.class, App.class, "example_bullet.hjson");
 	private static final Ship SHIP = REGISTRY.loadFromResource(Ship.class, App.class, "example_ship.hjson");
+	private static final Weapon WEAPON = REGISTRY.loadFromResource(Weapon.class, App.class, "example_weapon.hjson");
 	
     private App(int width, int height) {
     	// Setup window
@@ -67,29 +69,35 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
         		0
         	);
         
+        weaponState = WEAPON.createState();
     }
     
     private float time = 0;
     private Vector2 cursorWorldPos;
     private Battlefield battlefield;
     private Ship.Entity playerShipEntity;
+    private Weapon.State weaponState;
     
     /** Updates the game's state.
      * @param deltaT How much in-game time has passed since last call to this method.
      */
     private void update(float deltaT) {
     	battlefield.update(deltaT);
+    	weaponState.update(deltaT);
     	if(!playerShipEntity.isDead()) {
     		final var thrust = new Vector2(
 	            (keyboard.getOrDefault('D',false) ? 1 : 0) + (keyboard.getOrDefault('A',false) ? -1 : 0),
 	            (keyboard.getOrDefault('W',false) ? 1 : 0) + (keyboard.getOrDefault('S',false) ? -1 : 0)
             );
     		playerShipEntity.getReferenceFrame().setVelocity(thrust.length2() == 0 ? Vector2.ZERO : thrust.scaleTo(shiftPressed ? 10 : 20));
-    		if(mouseButtonPressed[1]) {
-    			final var rframe = playerShipEntity.getReferenceFrame().deepCopy();
-    			rframe.setVelocity((cursorWorldPos.sub(rframe.getPosition())).scaleTo(30));
-    			rframe.setRotation(rframe.getVelocity().normalize());
-    			ATTACK.attack(battlefield, rframe, Affiliation.FRIENDLY, 0);
+    		
+    		final var weaponRframe = playerShipEntity.getReferenceFrame().deepCopy();
+    		weaponRframe.setRotation((cursorWorldPos.sub(weaponRframe.getPosition())).normalize());
+    		if(mouseButtonPressed[1])
+    			weaponState.fire(battlefield, weaponRframe, Affiliation.FRIENDLY, deltaT);
+    		if(mouseButtonPressed[3]) {
+    			weaponRframe.setVelocity(weaponRframe.getRotation().scaleTo(30));
+    			ATTACK.attack(battlefield, weaponRframe, Affiliation.FRIENDLY, 0);
     		}
     	}
     }

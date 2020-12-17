@@ -47,8 +47,8 @@ public class Explosion extends AbstractProjectile {
     		this.radius = radius;
     		return (This) this;
     	}
-		
-		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+		@Override
+		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
 				case "radius": radius(json.asFloat()); break;
 				default: super.loadFieldFromJson(field, registry, json);
@@ -86,6 +86,8 @@ public class Explosion extends AbstractProjectile {
 	}
 	
 	public static Explosion fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
-		return builder().loadJson(registry, json).build();
+		var builder = builder();
+		builder.loadJson(registry, json);
+		return builder.build();
 	}
 }

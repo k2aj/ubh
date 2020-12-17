@@ -202,6 +202,8 @@ public final class ContentRegistry {
 		registry.registerLoader("SpreadAttack", SpreadAttack::fromJson);
 		registry.registerLoader("MultiAttack", MultiAttack::fromJson);
 		
+		registry.registerLoader(Weapon.class, Weapon::fromJson);
+		
 		// ubh.entity
 		registry.registerLoader("Ship", Ship::fromJson);
 		

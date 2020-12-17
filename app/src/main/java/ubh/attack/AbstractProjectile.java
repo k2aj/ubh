@@ -11,6 +11,7 @@ import ubh.entity.Living;
 import ubh.entity.LocalEntity;
 import ubh.loader.ContentException;
 import ubh.loader.ContentRegistry;
+import ubh.loader.JsonLoadable;
 import ubh.math.Circle;
 import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
@@ -37,7 +38,7 @@ public abstract class AbstractProjectile implements Attack {
 	}
 
     @SuppressWarnings("unchecked") 
-    public static abstract class Builder <This extends Builder<This>> {
+    public static abstract class Builder <This extends Builder<This>> implements JsonLoadable {
     	private float 
 			damage = 100, 
 			maxLifetime = 10;
@@ -73,7 +74,8 @@ public abstract class AbstractProjectile implements Attack {
 			pierceDepletedAttack = attack;
 			return (This) this;
 		}
-		protected void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+		@Override
+		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
 				case "damage": 		damage(json.asFloat()); 	 			      break;
 				case "maxLifetime": maxLifetime(json.asFloat()); 			      break;
@@ -82,11 +84,6 @@ public abstract class AbstractProjectile implements Attack {
 				case "hitAttack":   hitAttack(registry.load(Attack.class, json)); break;
 				case "pierceDepletedAttack": pierceDepletedAttack(registry.load(Attack.class, json)); break;
 			}
-		}
-		protected This loadJson(ContentRegistry registry, JsonValue json) throws ContentException {
-			for(var member : json.asObject())
-				loadFieldFromJson(member.getName(), registry, member.getValue());
-			return (This) this;
 		}
     }
     

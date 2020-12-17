@@ -44,7 +44,9 @@ public class Ship extends Living {
     }
 
     public static Ship fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
-    	return builder().loadJson(registry, json).build();
+    	var builder = builder();
+		builder.loadJson(registry, json);
+		return builder.build();
     }
 
 }
