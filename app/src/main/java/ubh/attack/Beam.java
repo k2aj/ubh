@@ -13,7 +13,6 @@ import ubh.math.Shape;
 import ubh.math.Vector2;
 
 /* TODO:
- * - hitAttack etc. spawn stuff at the beginning of the beam, should probably do it on the hit spot
  * - make beams shorter if they hit their pierce cap
  */
 public class Beam extends AbstractProjectile {

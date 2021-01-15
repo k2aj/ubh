@@ -135,7 +135,9 @@ public abstract class AbstractProjectile implements Attack {
 		public void collide(Battlefield battlefield, Living.Entity entity, Shape hitbox) {
 			if(pierce != 0) {
 				entity.damage(damage);
-				hitAttack.attack(battlefield, referenceFrame, affiliation, 0);
+				var hitAttackRframe = referenceFrame.deepCopy();
+				hitAttackRframe.setPosition(this.getHitbox().nearestPoint(hitbox.getPosition()));
+				hitAttack.attack(battlefield, hitAttackRframe, affiliation, 0);
 				if(pierce > 0) {
 					--pierce;
 					if(pierce == 0)

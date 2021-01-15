@@ -13,6 +13,12 @@ attack: {
 		color: cyan
 		type: Beam
 		damage: 5
+		hitAttack: {
+			type: Explosion
+			radius: 5
+			color: cyan
+			damage: 5
+		}
 	}
 	damage: 10
 }
