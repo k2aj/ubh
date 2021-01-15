@@ -8,7 +8,11 @@ attack: {
 	hitbox: {
 		radius: 1
 	}
-	bouncy: true
-	pierce: 10
+	maxLifetime: 1
+	lifetimeDepletedAttack: {
+		color: cyan
+		type: Beam
+		damage: 5
+	}
 	damage: 10
 }

@@ -26,7 +26,8 @@ public abstract class AbstractProjectile implements Attack {
 	
 	protected final Attack 
 		hitAttack,
-		pierceDepletedAttack;
+		pierceDepletedAttack,
+		lifetimeDepletedAttack;
 	
 	protected AbstractProjectile (Builder<?> builder) {
 		this.damage = builder.damage;
@@ -35,6 +36,7 @@ public abstract class AbstractProjectile implements Attack {
 		this.color = builder.color;
 		this.hitAttack = builder.hitAttack;
 		this.pierceDepletedAttack = builder.pierceDepletedAttack;
+		this.lifetimeDepletedAttack = builder.lifetimeDepletedAttack;
 	}
 
     @SuppressWarnings("unchecked") 
@@ -46,7 +48,8 @@ public abstract class AbstractProjectile implements Attack {
 		private Color color = Color.WHITE;
 		private Attack 
 			hitAttack = Attack.NULL,
-			pierceDepletedAttack = Attack.NULL;
+			pierceDepletedAttack = Attack.NULL,
+			lifetimeDepletedAttack = Attack.NULL;
 		
 		public abstract AbstractProjectile build();
 		
@@ -74,6 +77,10 @@ public abstract class AbstractProjectile implements Attack {
 			pierceDepletedAttack = attack;
 			return (This) this;
 		}
+		public This lifetimeDepletedAttack(Attack attack) {
+			lifetimeDepletedAttack = attack;
+			return (This) this;
+		}
 		@Override
 		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
@@ -83,6 +90,7 @@ public abstract class AbstractProjectile implements Attack {
 				case "color":		color(registry.load(Color.class, json));      break;
 				case "hitAttack":   hitAttack(registry.load(Attack.class, json)); break;
 				case "pierceDepletedAttack": pierceDepletedAttack(registry.load(Attack.class, json)); break;
+				case "lifetimeDepletedAttack": lifetimeDepletedAttack(registry.load(Attack.class, json)); break;
 			}
 		}
     }
@@ -110,6 +118,9 @@ public abstract class AbstractProjectile implements Attack {
 		
 		@Override
 		public void onDespawned(Battlefield battlefield) {
+			if(lifetime >= maxLifetime) {
+				lifetimeDepletedAttack.attack(battlefield, referenceFrame, affiliation, 0);
+			}
 			// Destroy collider
 			if(collider != null)
 				try {
