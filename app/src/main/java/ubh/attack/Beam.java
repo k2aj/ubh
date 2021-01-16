@@ -97,7 +97,7 @@ public class Beam extends AbstractProjectile {
 			g.setColor(color);
 			g.enableFill();
 			hitbox.draw(g);
-			g.drawCircle(referenceFrame.getPosition(), hitbox.getRadii().y()*1.5f);
+			g.drawCircle(referenceFrame.getPosition(), hitbox.getRadii().y()*2);
 		}
 	}
 	

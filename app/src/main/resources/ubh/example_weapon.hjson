@@ -1,3 +1,4 @@
+id: "example_weapon"
 maxAmmo: 3
 fireRate: 10
 reloadTime: 0.5
@@ -12,7 +13,7 @@ attack: {
 	lifetimeDepletedAttack: {
 		color: cyan
 		type: Beam
-		damage: 5
+		damage: 50
 		hitAttack: {
 			type: Explosion
 			radius: 5

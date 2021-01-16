@@ -36,11 +36,15 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
 		WORLD_HEIGHT = 72;
 	
 	private final JFrame frame;
-	private static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
+	private static final ContentRegistry REGISTRY;
+	static {
+		REGISTRY = ContentRegistry.createDefault();
+		REGISTRY.addHjsonSource(App.class, "example_bullet.hjson");
+		REGISTRY.addHjsonSource(App.class, "example_ship.hjson");
+		REGISTRY.addHjsonSource(App.class, "example_weapon.hjson");
+	}
 	
-	private static final Attack ATTACK = REGISTRY.loadFromResource(Attack.class, App.class, "example_bullet.hjson");
-	private static final Ship SHIP = REGISTRY.loadFromResource(Ship.class, App.class, "example_ship.hjson");
-	private static final Weapon WEAPON = REGISTRY.loadFromResource(Weapon.class, App.class, "example_weapon.hjson");
+	private static final Ship SHIP = REGISTRY.load(Ship.class, "example_ship");
 	
     private App(int width, int height) {
     	// Setup window
@@ -68,37 +72,33 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
         		Affiliation.ENEMY, 
         		0
         	);
-        
-        weaponState = WEAPON.createState();
     }
     
     private float time = 0;
     private Vector2 cursorWorldPos;
     private Battlefield battlefield;
     private Ship.Entity playerShipEntity;
-    private Weapon.State weaponState;
+    //private Weapon.State weaponState;
     
     /** Updates the game's state.
      * @param deltaT How much in-game time has passed since last call to this method.
      */
     private void update(float deltaT) {
     	battlefield.update(deltaT);
-    	weaponState.update(deltaT);
+    	//weaponState.update(deltaT);
     	if(!playerShipEntity.isDead()) {
     		final var thrust = new Vector2(
 	            (keyboard.getOrDefault('D',false) ? 1 : 0) + (keyboard.getOrDefault('A',false) ? -1 : 0),
 	            (keyboard.getOrDefault('W',false) ? 1 : 0) + (keyboard.getOrDefault('S',false) ? -1 : 0)
             );
-    		playerShipEntity.getReferenceFrame().setVelocity(thrust.length2() == 0 ? Vector2.ZERO : thrust.scaleTo(shiftPressed ? 10 : 20));
+    		for(int i=0; i<Math.min(playerShipEntity.weaponCount(), 9); ++i)
+    			if(keyboard.getOrDefault((char)('1'+i), false)) {
+    				activeWeapon = i;
+    			}
     		
-    		final var weaponRframe = playerShipEntity.getReferenceFrame().deepCopy();
-    		weaponRframe.setRotation((cursorWorldPos.sub(weaponRframe.getPosition())).normalize());
+    		playerShipEntity.setThrust(thrust.length2() == 0 ? Vector2.ZERO : thrust.normalize());
     		if(mouseButtonPressed[1])
-    			weaponState.fire(battlefield, weaponRframe, Affiliation.FRIENDLY, deltaT);
-    		if(mouseButtonPressed[3]) {
-    			weaponRframe.setVelocity(weaponRframe.getRotation().scaleTo(30));
-    			ATTACK.attack(battlefield, weaponRframe, Affiliation.FRIENDLY, 0);
-    		}
+    			playerShipEntity.fireWeapon(battlefield, deltaT, activeWeapon, cursorWorldPos);
     	}
     }
     
@@ -149,6 +149,7 @@ public final class App extends WindowAdapter implements KeyListener, MouseInputL
     private Point cursorScreenPos = new Point(0,0);
     private final HashMap<Character,Boolean> keyboard = new HashMap<>();
     private boolean shiftPressed = false;
+    private int activeWeapon = 0;
     
     //------------------------------LISTENERS------------------------------
     @Override public void windowClosing(WindowEvent e) {

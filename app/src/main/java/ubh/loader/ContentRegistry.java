@@ -1,7 +1,11 @@
 package ubh.loader;
 
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +17,63 @@ import ubh.entity.*;
 import ubh.math.*;
 
 /** {@code ContentRegistry} is responsible for loading various types of game content. */
-public final class ContentRegistry {
+public final class ContentRegistry {	
 	
 	private ContentRegistry() {}
 	
 	private Map<String, ContentLoader<?>> namedLoaders = new HashMap<>();
 	private Map<Class<?>, ContentLoader<?>> defaultLoaders = new HashMap<>();
 	private Map<Class<?>, Object> defaultValues = new HashMap<>();
+	
+	private Map<String, JsonValue> sourceIndex = new HashMap<>();
+	private Map<String, Object> objectIndex = new HashMap<>();
+	private Map<String, LoadingState> objectLoadingStates = new HashMap<>();
+	
+	/** Recursively finds all objects within json that have a string-valued id field and adds them to sourceIndex */
+	private void createIndexEntriesFor(JsonValue json) {
+		if(json.isObject()) {
+			for(var member : json.asObject()) {
+				if(member.getName().equals("id") && member.getValue().isString()) {
+					var id = member.getValue().asString();
+					if(sourceIndex.containsKey(id)) {
+						// TODO: do something sensible when getting duplicate content IDs
+						// currently we just skip future objects with the same id
+					} else {
+						sourceIndex.put(id, json);
+						objectLoadingStates.put(id, LoadingState.NOT_LOADED);
+					}
+				} else {
+					createIndexEntriesFor(member.getValue());
+				}
+			}
+		} else if(json.isArray()) {
+			for(var element : json.asArray())
+				createIndexEntriesFor(element);
+		}
+	}
+	
+	public void addHjsonSource(Class<?> clazz, String resource) {
+		try(var reader = new BufferedReader(new InputStreamReader(clazz.getResourceAsStream(resource)))) {
+			createIndexEntriesFor(JsonValue.readHjson(reader));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+			// TODO: handle error
+		}
+	}
+	
+	public void addHjsonSource(String path) {
+		try(var reader = new BufferedReader(new FileReader(path))) {
+			createIndexEntriesFor(JsonValue.readHjson(reader));
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+			/// TODO: handle error
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+			/// TODO: handle error
+		}
+	}
+	
+	
 	
 	/** Registers a named content loader.
 	 * <p>
@@ -29,7 +83,7 @@ public final class ContentRegistry {
 	 * @param loader
 	 * @see ContentRegistry#load
 	 */
-	private void registerLoader(String name, ContentLoader<?> loader) {
+	public void registerLoader(String name, ContentLoader<?> loader) {
 		namedLoaders.put(name, loader);
 	}
 	/** Registers a default content loader for a content type. 
@@ -43,7 +97,7 @@ public final class ContentRegistry {
 	 * @param loader
 	 * @see ContentRegistry#load
 	 */
-	private <T> void registerLoader(Class<T> clazz, ContentLoader<T> loader) {
+	public <T> void registerLoader(Class<T> clazz, ContentLoader<T> loader) {
 		defaultLoaders.put(clazz, loader);
 	}
 	/** Registers a default value for a content type.
@@ -60,8 +114,29 @@ public final class ContentRegistry {
 	 * <p>
 	 * Default value should be immutable, as it may be shared by multiple objects.
 	 */
-	private <T> void registerDefault(Class<T> clazz, T value) {
+	public <T> void registerDefault(Class<T> clazz, T value) {
 		defaultValues.put(clazz, value);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T load(Class<T> clazz, String id) {
+		switch(objectLoadingStates.get(id)) {
+		case LOADED: return (T) objectIndex.get(id);
+		case NOT_LOADED:
+			objectLoadingStates.put(id, LoadingState.LOADING_IN_PROGRESS);
+			try {
+				var result = load(clazz, sourceIndex.get(id));
+				objectLoadingStates.put(id, LoadingState.LOADED);
+				objectIndex.put(id, result); 
+				return result;
+			} catch (Exception e) {
+				objectLoadingStates.put(id, LoadingState.ERROR);
+				throw e;
+			}
+		case LOADING_IN_PROGRESS: throw new ContentException("Cyclic dependency");
+		case ERROR: throw new ContentException(String.format("Object %s is invalid", id));
+		default: throw new Error("This should never happen");
+		}
 	}
 	
 	/** Loads content from passed JsonValue.
@@ -84,6 +159,13 @@ public final class ContentRegistry {
 		
 		Object result = null;
 		
+		// If we got an unexpected string, then it's probably a named object id
+		if(json.isString() && clazz != String.class) {
+			var id = json.asString();
+			if(sourceIndex.containsKey(id))
+				return load(clazz, id);
+		}
+		
 		// Try to use named loader
 		if(json.isObject()) {
 			final var obj = json.asObject();
@@ -95,7 +177,7 @@ public final class ContentRegistry {
 					catch (Exception e) {
 						// TODO: THIS IS HORRIBLE
 						// REPLACE IT WITH PROPER EXCEPTION HANDLING LATER
-						e.printStackTrace();
+						throw new RuntimeException(e);
 					}
 					if(!clazz.isInstance(result))
 						result = null;
@@ -110,7 +192,7 @@ public final class ContentRegistry {
 				catch (Exception e) {
 					// TODO: THIS IS HORRIBLE
 					// REPLACE IT WITH PROPER EXCEPTION HANDLING LATER
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 		}
 		// Try to return the default object for that type

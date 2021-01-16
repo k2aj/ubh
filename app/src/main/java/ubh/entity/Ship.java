@@ -1,24 +1,73 @@
 package ubh.entity;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hjson.JsonValue;
 
+import ubh.Battlefield;
 import ubh.UBHGraphics;
+import ubh.attack.Weapon;
 import ubh.loader.ContentException;
 import ubh.loader.ContentRegistry;
 import ubh.math.ReferenceFrame;
+import ubh.math.Vector2;
 
 public class Ship extends Living {
 	
+	protected final Vector2 maxThrust;
+	protected final float friction;
+	protected final List<Weapon> weapons;
+	
 	protected Ship(Builder<?> builder) {
 		super(builder);
+		this.maxThrust = builder.maxThrust;
+		this.friction = builder.friction;
+		this.weapons = new ArrayList<>(builder.weapons);
 	}
 	public static Builder<?> builder() {
         return new Builder<>();
     }
     @SuppressWarnings("unchecked") 
     public static class Builder <This extends Builder<This>> extends Living.Builder<This> {
+    	
+    	private Vector2 maxThrust = new Vector2(100,100);
+    	private float friction = 0.8f;
+    	private List<Weapon> weapons = List.of();
+    	
+    	public This maxThrust(Vector2 maxThrust) {
+    		this.maxThrust = maxThrust;
+    		return (This) this;
+    	}
+    	
+    	public This weapons(List<Weapon> weapons) {
+    		this.weapons = new ArrayList<Weapon>(weapons);
+    		return (This) this;
+    	}
+    	
+    	public This friction(float friction) {
+    		this.friction = friction;
+    		return (This) this;
+    	}
+    	
+    	@Override
+		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
+			switch(field) {
+				case "maxThrust": maxThrust(registry.load(Vector2.class, json)); break;
+				case "weapons": 
+					weapons(
+						json.asArray().values().stream()
+						.map(elem -> registry.load(Weapon.class, elem))
+						.collect(Collectors.toList())
+					);
+				break;
+				case "friction": friction(json.asFloat()); break;
+				default: super.loadFieldFromJson(field, registry, json);
+			}
+		}
+    	
 		@Override
 		public Ship build() {
 			return new Ship(this);
@@ -31,10 +80,39 @@ public class Ship extends Living {
 	}
 	
     public class Entity extends Living.Entity {
+    	
+    	private Vector2 thrust = Vector2.ZERO;
+    	private List<Weapon.State> weaponStates; 
 
 		protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 			super(referenceFrame, affiliation);
+			weaponStates = weapons.stream().map(Weapon::createState).collect(Collectors.toList());
 		}
+		
+		public void setThrust(Vector2 thrust) {
+			this.thrust = thrust;
+		}
+		
+		public int weaponCount() {
+			return weaponStates.size();
+		}
+		
+		public void fireWeapon(Battlefield battlefield, float deltaT, int weaponIndex, Vector2 target) {
+			var weaponRframe = referenceFrame.deepCopy();
+			weaponRframe.setRotation(target.sub(weaponRframe.getPosition()).normalize());
+			weaponStates.get(weaponIndex).fire(battlefield, weaponRframe, affiliation, deltaT);
+		}
+		
+		@Override
+		public void update(Battlefield battlefield, float deltaT) {
+			Vector2 acceleration = thrust.mul(maxThrust);
+			referenceFrame.setVelocity(referenceFrame.getVelocity().add(acceleration.mul(deltaT)));
+			referenceFrame.setVelocity(referenceFrame.getVelocity().mul((float) Math.pow(1-friction, deltaT)));
+			super.update(battlefield, deltaT);
+			for(var w : weaponStates)
+				w.update(deltaT);
+		}
+		
 		@Override
 		public void draw(UBHGraphics g) {
 			g.setColor(affiliation == Affiliation.FRIENDLY ? Color.green : Color.red);

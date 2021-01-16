@@ -1,3 +1,4 @@
+id: example_ship
 type: Ship
 hitbox: {
 	radius: 5
@@ -8,3 +9,12 @@ deathAttack: {
 	radius: 15
 	color: white
 }
+
+weapons: [
+	example_weapon
+	{
+		reloadRate: 20
+		attack: example_bullet
+		velocity: 120
+	}
+]

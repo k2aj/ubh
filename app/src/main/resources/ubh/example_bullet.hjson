@@ -1,4 +1,5 @@
 type: SpreadAttack
+id: example_bullet
 
 randomWeight: 0.3
 
