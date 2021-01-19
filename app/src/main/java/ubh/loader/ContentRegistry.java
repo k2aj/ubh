@@ -13,6 +13,7 @@ import org.hjson.JsonValue;
 
 import ubh.attack.*;
 import ubh.entity.*;
+import ubh.entity.ai.*;
 import ubh.math.*;
 
 /** {@code ContentRegistry} is responsible for loading various types of game content. */
@@ -286,6 +287,8 @@ public final class ContentRegistry {
 		
 		// ubh.entity
 		registry.registerLoader("Ship", Ship::fromJson);
+		registry.registerDefault(AI.class, AI.NULL);
+		registry.register("boss", BossAI.getInstance());
 		
 		return registry;
 	}

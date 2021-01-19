@@ -1,5 +1,6 @@
 id: example_ship
 type: Ship
+ai: boss
 hitbox: {
 	radius: 5
 }

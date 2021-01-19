@@ -67,7 +67,6 @@ public final class App extends WindowAdapter implements AutoCloseable {
         		),
         		Affiliation.ENEMY
         	);
-        	enemyShip.setAI(BossAI.getInstance());
         	battlefield.spawn(enemyShip, 0);
         }
     }

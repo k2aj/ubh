@@ -73,6 +73,7 @@ public class Ship extends Living {
 					);
 				break;
 				case "friction": friction(json.asFloat()); break;
+				case "ai": ai(registry.load(AI.class, json));
 				default: super.loadFieldFromJson(field, registry, json);
 			}
 		}
