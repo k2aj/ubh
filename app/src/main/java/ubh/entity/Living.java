@@ -120,6 +120,10 @@ public abstract class Living implements Attack {
 	    public float getCurrentHealth() {
 	        return health;
 	    }
+	    
+	    public Affiliation getAffiliation() {
+	    	return affiliation;
+	    }
 	
 	    @Override
 	    public boolean isDead() {

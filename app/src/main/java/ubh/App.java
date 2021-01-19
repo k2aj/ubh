@@ -10,7 +10,7 @@ import javax.swing.WindowConstants;
 import ubh.math.Vector2;
 import ubh.entity.Affiliation;
 import ubh.entity.Ship;
-import ubh.entity.ai.PlayerAI;
+import ubh.entity.ai.*;
 import ubh.loader.ContentRegistry;
 import ubh.math.AABB;
 import ubh.math.ReferenceFrame;
@@ -59,16 +59,17 @@ public final class App extends WindowAdapter implements AutoCloseable {
         playerShipEntity.setAI(playerAI);
         battlefield.spawn(playerShipEntity, 0);
         
-        for(int i=0; i<20; ++i)
-        	SHIP.attack(
-        		battlefield, 
+        for(int i=0; i<5; ++i) {
+        	var enemyShip = SHIP.createEntity(
         		new ReferenceFrame(new Vector2(
         			((float) Math.random() - 0.5f)*2*WORLD_HEIGHT, 
         			WORLD_HEIGHT*(float) Math.random())
         		),
-        		Affiliation.ENEMY, 
-        		0
+        		Affiliation.ENEMY
         	);
+        	enemyShip.setAI(BossAI.getInstance());
+        	battlefield.spawn(enemyShip, 0);
+        }
     }
     
     private Battlefield battlefield;

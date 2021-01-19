@@ -7,4 +7,8 @@ public final class MathUtil {
     public static boolean approxEquals(float a, float b) {
         return Math.abs(a-b) < 1e-3f;
     }
+    
+    public static int clamp(int value, int min, int max) {
+    	return Math.min(max, Math.max(min, value));
+    }
 }

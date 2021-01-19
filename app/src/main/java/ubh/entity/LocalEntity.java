@@ -2,6 +2,7 @@ package ubh.entity;
 
 import ubh.Battlefield;
 import ubh.math.ReferenceFrame;
+import ubh.math.Vector2;
 
 public abstract class LocalEntity extends Entity {
     protected ReferenceFrame referenceFrame;
@@ -12,9 +13,7 @@ public abstract class LocalEntity extends Entity {
     public void update(Battlefield battlefield, float deltaT) {
         referenceFrame.update(deltaT);
     }
-
-    @Deprecated
-    public ReferenceFrame getReferenceFrame() {
-        return referenceFrame;
+    public Vector2 getPosition() {
+    	return referenceFrame.getPosition();
     }
 }
