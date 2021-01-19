@@ -2,12 +2,17 @@ package ubh.loader;
 
 import java.awt.Color;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.hjson.JsonValue;
 
@@ -52,25 +57,53 @@ public final class ContentRegistry {
 		}
 	}
 	
-	public void addHjsonSource(Class<?> clazz, String resource) {
-		try(var reader = new BufferedReader(new InputStreamReader(clazz.getResourceAsStream(resource)))) {
+	public void addHjsonSource(InputStream source) throws IOException {
+		try(var reader = new BufferedReader(new InputStreamReader(source))) {
 			createIndexEntriesFor(JsonValue.readHjson(reader));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-			// TODO: handle error
 		}
 	}
 	
-	public void addHjsonSource(String path) {
-		try(var reader = new BufferedReader(new FileReader(path))) {
-			createIndexEntriesFor(JsonValue.readHjson(reader));
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-			/// TODO: handle error
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-			/// TODO: handle error
+	public void addHjsonSource(Class<?> clazz, String resource) {
+		try {
+			addHjsonSource(clazz.getResourceAsStream(resource));
+		} catch (IOException ioe) {
+			// Programmer error, bail out
+			throw new Error(ioe);
 		}
+	}
+	
+	public void addSource(File file) {
+		if(!file.canRead())
+			return;
+		if(file.isDirectory()) {
+			for(var child : file.listFiles())
+				addSource(child);
+		} else {
+			var name = file.getName().toLowerCase();
+			if(name.endsWith(".hjson") || name.endsWith(".json"))
+				try {
+					addHjsonSource(new FileInputStream(file));
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+					// TODO: handle error
+				} catch (IOException e) {
+					e.printStackTrace();
+					// TODO: handle error
+				}
+		}
+	}
+	
+	public void addSource(JarFile jar) {
+		jar.entries().asIterator().forEachRemaining(entry -> {
+			var name = entry.getName().toLowerCase();
+			if(name.endsWith(".hjson") || name.endsWith(".json"))
+				try {
+					addHjsonSource(jar.getInputStream(entry));
+				} catch (IOException e) {
+					e.printStackTrace();
+					// TODO: handle error
+				}
+		});
 	}
 	
 	
@@ -232,7 +265,7 @@ public final class ContentRegistry {
 		var registry = new ContentRegistry();
 		
 		// JVM classes
-		registry.registerLoader(Color.class, (reg,json) -> {
+		ContentLoader<Color> colorLoader = (reg,json) -> {
 			if(json.isObject()) {
 				// Try to handle both RGB and HSV colors
 				boolean isHsv = false;
@@ -258,18 +291,13 @@ public final class ContentRegistry {
 			} else {
 				throw new ContentException(json.toString() + " is not a valid Color");
 			}
-		});
-		registry.register("red", Color.red);
-		registry.register("green", Color.green);
-		registry.register("blue", Color.blue);
-		registry.register("cyan", Color.cyan);
-		registry.register("magenta", Color.magenta);
-		registry.register("yellow", Color.yellow);
-		registry.register("black", Color.black);
-		registry.register("white", Color.white);
+		};
+		registry.registerLoader(Color.class, colorLoader);
+		registry.registerLoader("Color", colorLoader);
 		
 		// ubh.math
 		registry.registerLoader(Vector2.class, Vector2::fromJson);
+		registry.registerLoader("Vector2", Vector2::fromJson);
 		registry.registerLoader(Shape.class, Shape::fromJson);
 		registry.registerLoader("Circle", Circle::fromJson);
 		registry.registerLoader("Rectangle", Rectangle::fromJson);

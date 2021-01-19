@@ -4,6 +4,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.jar.JarFile;
+
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -32,12 +37,22 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	private final CoordinateTransform transform = new CoordinateTransform();
 	private final UserInput userInput = new UserInput(transform);
 	private final PlayerAI playerAI = new PlayerAI(userInput);
-	private static final ContentRegistry REGISTRY;
+	private static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
 	static {
-		REGISTRY = ContentRegistry.createDefault();
-		REGISTRY.addHjsonSource(App.class, "example_bullet.hjson");
-		REGISTRY.addHjsonSource(App.class, "example_ship.hjson");
-		REGISTRY.addHjsonSource(App.class, "example_weapon.hjson");
+		/* Try to find all .hjson resource files and add them to REGISTRY */
+		try {
+			var sourceCodeLocation = new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+			if(sourceCodeLocation.isFile() && sourceCodeLocation.getPath().endsWith(".jar")) {
+				// game was run from JAR file
+				var thisJarFile = new JarFile(sourceCodeLocation);
+				REGISTRY.addSource(thisJarFile);
+			} else {
+				// game was run from a regular folder containing compiled classes, probably by launching from an IDE?
+				REGISTRY.addSource(sourceCodeLocation);
+			}
+		} catch (URISyntaxException | IOException e) {
+			throw new Error(e);
+		}
 	}
 	
 	private static final Ship SHIP = REGISTRY.load(Ship.class, "example_ship");

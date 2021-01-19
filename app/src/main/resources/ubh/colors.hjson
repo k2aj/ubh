@@ -1,0 +1,10 @@
+[
+	{type: "Color", id: "red", hue:0}
+	{type: "Color", id: "green", hue:0.33333}
+	{type: "Color", id: "blue", hue:0.66667}
+	{type: "Color", id: "cyan", hue:0.5}
+	{type: "Color", id: "magenta", hue:0.83333}
+	{type: "Color", id: "yellow", hue:0.16667}
+	{type: "Color", id: "black", value:0}
+	{type: "Color", id: "white", saturation:0, value:1}
+]
