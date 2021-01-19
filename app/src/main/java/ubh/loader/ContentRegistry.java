@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
@@ -118,6 +117,11 @@ public final class ContentRegistry {
 		defaultValues.put(clazz, value);
 	}
 	
+	public void register(String id, Object value) {
+		objectIndex.put(id, value);
+		objectLoadingStates.put(id, LoadingState.LOADED);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T> T load(Class<T> clazz, String id) {
 		switch(objectLoadingStates.get(id)) {
@@ -126,8 +130,7 @@ public final class ContentRegistry {
 			objectLoadingStates.put(id, LoadingState.LOADING_IN_PROGRESS);
 			try {
 				var result = load(clazz, sourceIndex.get(id));
-				objectLoadingStates.put(id, LoadingState.LOADED);
-				objectIndex.put(id, result); 
+				register(id, result);
 				return result;
 			} catch (Exception e) {
 				objectLoadingStates.put(id, LoadingState.ERROR);
@@ -162,7 +165,7 @@ public final class ContentRegistry {
 		// If we got an unexpected string, then it's probably a named object id
 		if(json.isString() && clazz != String.class) {
 			var id = json.asString();
-			if(sourceIndex.containsKey(id))
+			if(objectLoadingStates.containsKey(id))
 				return load(clazz, id);
 		}
 		
@@ -251,23 +254,19 @@ public final class ContentRegistry {
 				} else {
 					return new Color(r,g,b,a);
 				}
-			} else if(json.isString()) {
-				// Not using Color.getColor because I think it may not be portable
-				switch(json.asString().toLowerCase()) {
-				case "red": return Color.red;
-				case "green": return Color.green;
-				case "blue": return Color.blue;
-				case "cyan": return Color.cyan;
-				case "magenta": return Color.magenta;
-				case "yellow": return Color.yellow;
-				case "black": return Color.black;
-				case "white": return Color.white;
-				default: throw new ContentException("Unknown color: "+json.asString());
-				}
 			} else {
 				throw new ContentException(json.toString() + " is not a valid Color");
 			}
 		});
+		registry.register("red", Color.red);
+		registry.register("green", Color.green);
+		registry.register("blue", Color.blue);
+		registry.register("cyan", Color.cyan);
+		registry.register("magenta", Color.magenta);
+		registry.register("yellow", Color.yellow);
+		registry.register("black", Color.black);
+		registry.register("white", Color.white);
+		
 		// ubh.math
 		registry.registerLoader(Vector2.class, Vector2::fromJson);
 		registry.registerLoader(Shape.class, Shape::fromJson);
