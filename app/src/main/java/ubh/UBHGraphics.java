@@ -13,48 +13,12 @@ import ubh.math.Vector2;
  */
 public final class UBHGraphics implements AutoCloseable {
     private final Graphics2D graphics;
-    private final float translationX, translationY, scaleX, scaleY;
-    private final Dimension windowSize;
+    private final CoordinateTransform transform;
     private boolean fillEnabled = true;
 
-    /**@param graphics
-     * @param windowSize Dimensions of the window in screen space.
-     * @param worldSize Dimensions of the window in world space.
-     */
-    public UBHGraphics(Graphics2D graphics, Dimension windowSize, Vector2 worldSize) {
+    public UBHGraphics(Graphics2D graphics, CoordinateTransform transform) {
         this.graphics = graphics;
-        this.windowSize = windowSize;
-        translationX = windowSize.width/2f;
-        translationY = windowSize.height/2f;
-        scaleX = windowSize.width/worldSize.x()/2;
-        scaleY = -windowSize.height/worldSize.y()/2;
-    }
-
-    // Functions to convert between screen space & world space coordinates
-    private int xToScreenSpace(float x) {
-        return (int)(x*scaleX+translationX);
-    }
-    private int yToScreenSpace(float y) {
-        return (int)(y*scaleY+translationY);
-    }
-    private float xToWorldSpace(int x) {
-        return (x-translationX)/scaleX;
-    }
-    private float yToWorldSpace(int y) {
-        return (y-translationY)/scaleY;
-    }
-    private int widthToScreenSpace(float width) {
-        return (int)(width*scaleX);
-    }
-    private int heightToScreenSpace(float height) {
-        return (int)(-height*scaleY);
-    }
-
-    /**@param windowPosition Screen space coordinates.
-     * @return windowPosition converted to world space. 
-     */
-    public Vector2 transformIntoWorldSpace(Point windowPosition) {
-        return new Vector2(xToWorldSpace(windowPosition.x), yToWorldSpace(windowPosition.y));
+        this.transform = transform;
     }
 
     /** Sets color used by future drawing operations. */
@@ -78,9 +42,9 @@ public final class UBHGraphics implements AutoCloseable {
      * @param radius
      */
     public void drawCircle(float x, float y, float radius) {
-        int wx = xToScreenSpace(x-radius),
-            wy = yToScreenSpace(y+radius),
-            wd = widthToScreenSpace(2*radius);
+        int wx = transform.xToScreenSpace(x-radius),
+            wy = transform.yToScreenSpace(y+radius),
+            wd = transform.widthToScreenSpace(2*radius);
         if(fillEnabled)
             graphics.fillOval(wx,wy,wd,wd);
         else
@@ -93,10 +57,10 @@ public final class UBHGraphics implements AutoCloseable {
 
     public void drawLine(Vector2 begin, Vector2 end) {
         graphics.drawLine(
-            xToScreenSpace(begin.x()),
-            yToScreenSpace(begin.y()),
-            xToScreenSpace(end.x()),
-            yToScreenSpace(end.y())
+    		transform.xToScreenSpace(begin.x()),
+    		transform.yToScreenSpace(begin.y()),
+    		transform.xToScreenSpace(end.x()),
+    		transform.yToScreenSpace(end.y())
         );
     }
 
@@ -107,10 +71,10 @@ public final class UBHGraphics implements AutoCloseable {
      * @param ry half of the height of the rectangle
      */
     public void drawCenteredRect(float x, float y, float rx, float ry) {
-        int wx = xToScreenSpace(x-rx),
-            wy = yToScreenSpace(y+ry),
-            wwidth = widthToScreenSpace(2*rx), 
-            wheight = heightToScreenSpace(2*ry);
+        int wx = transform.xToScreenSpace(x-rx),
+            wy = transform.yToScreenSpace(y+ry),
+            wwidth = transform.widthToScreenSpace(2*rx), 
+            wheight = transform.heightToScreenSpace(2*ry);
         if(fillEnabled)
             graphics.fillRect(wx,wy,wwidth,wheight);
         else
@@ -143,8 +107,8 @@ public final class UBHGraphics implements AutoCloseable {
         for(int i=0; i<4; ++i) {
             float curRx = i==0 || i==3 ? -rx : rx,
                   curRy = i<2 ? -ry : ry;
-            xs[i] = xToScreenSpace(x + curRx*cos - curRy*sin);
-            ys[i] = yToScreenSpace(y + curRx*sin + curRy*cos);
+            xs[i] = transform.xToScreenSpace(x + curRx*cos - curRy*sin);
+            ys[i] = transform.yToScreenSpace(y + curRx*sin + curRy*cos);
         }
         if(fillEnabled)
             graphics.fillPolygon(xs,ys,4);
@@ -175,7 +139,7 @@ public final class UBHGraphics implements AutoCloseable {
     /** Clears the screen to given color */
     public void clear(Color color) {
         graphics.setBackground(color);
-        graphics.clearRect(0,0,windowSize.width,windowSize.height);
+        graphics.clearRect(0,0,transform.getWindowSize().width,transform.getWindowSize().height);
     }
 
     @Override

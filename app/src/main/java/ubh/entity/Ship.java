@@ -14,18 +14,21 @@ import ubh.loader.ContentException;
 import ubh.loader.ContentRegistry;
 import ubh.math.ReferenceFrame;
 import ubh.math.Vector2;
+import ubh.entity.ai.AI;
 
 public class Ship extends Living {
 	
 	protected final Vector2 maxThrust;
 	protected final float friction;
 	protected final List<Weapon> weapons;
+	protected final AI ai;
 	
 	protected Ship(Builder<?> builder) {
 		super(builder);
 		this.maxThrust = builder.maxThrust;
 		this.friction = builder.friction;
 		this.weapons = new ArrayList<>(builder.weapons);
+		this.ai = builder.ai;
 	}
 	public static Builder<?> builder() {
         return new Builder<>();
@@ -36,6 +39,7 @@ public class Ship extends Living {
     	private Vector2 maxThrust = new Vector2(100,100);
     	private float friction = 0.8f;
     	private List<Weapon> weapons = List.of();
+    	private AI ai = AI.NULL;
     	
     	public This maxThrust(Vector2 maxThrust) {
     		this.maxThrust = maxThrust;
@@ -49,6 +53,11 @@ public class Ship extends Living {
     	
     	public This friction(float friction) {
     		this.friction = friction;
+    		return (This) this;
+    	}
+    	
+    	public This ai(AI ai) {
+    		this.ai = ai;
     		return (This) this;
     	}
     	
@@ -83,10 +92,12 @@ public class Ship extends Living {
     	
     	private Vector2 thrust = Vector2.ZERO;
     	private List<Weapon.State> weaponStates; 
+    	private AI.State aiState;
 
 		protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 			super(referenceFrame, affiliation);
 			weaponStates = weapons.stream().map(Weapon::createState).collect(Collectors.toList());
+			setAI(ai);
 		}
 		
 		public void setThrust(Vector2 thrust) {
@@ -103,8 +114,13 @@ public class Ship extends Living {
 			weaponStates.get(weaponIndex).fire(battlefield, weaponRframe, affiliation, deltaT);
 		}
 		
+		public void setAI(AI ai) {
+			aiState = ai.createState();
+		}
+		
 		@Override
 		public void update(Battlefield battlefield, float deltaT) {
+			aiState.update(battlefield, deltaT, this);
 			Vector2 acceleration = thrust.mul(maxThrust);
 			referenceFrame.setVelocity(referenceFrame.getVelocity().add(acceleration.mul(deltaT)));
 			referenceFrame.setVelocity(referenceFrame.getVelocity().mul((float) Math.pow(1-friction, deltaT)));
