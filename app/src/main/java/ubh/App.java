@@ -60,15 +60,7 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	}
 	
 	private static final Ship SHIP = REGISTRY.load(Ship.class, "example_ship");
-	
-	private static final BufferedImage IMAGE;
-	static {
-		try {
-			IMAGE = ImageIO.read(App.class.getResourceAsStream("ohno.png"));
-		} catch (IOException ioe) {
-			throw new Error(ioe);
-		}
-	}
+	private static final BufferedImage IMAGE = REGISTRY.load(BufferedImage.class, "ohno.png");
 	
     private App(int width, int height) {
     	// Setup window

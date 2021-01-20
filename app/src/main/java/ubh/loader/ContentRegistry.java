@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.imageio.ImageIO;
+
 import org.hjson.JsonValue;
 
 import ubh.attack.*;
@@ -72,6 +74,10 @@ public final class ContentRegistry {
 		}
 	}
 	
+	public void addImageSource(String name, InputStream source) throws IOException {
+		register(name, ImageIO.read(source));
+	}
+	
 	public void addSource(File file) {
 		if(!file.canRead())
 			return;
@@ -90,6 +96,16 @@ public final class ContentRegistry {
 					e.printStackTrace();
 					// TODO: handle error
 				}
+			else if(name.endsWith(".png"))
+				try(InputStream i = new FileInputStream(file)) {
+					addImageSource(name, i);
+				} catch (FileNotFoundException e) {
+					// TODO handle error
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+					// TODO handle error
+				}
 		}
 	}
 	
@@ -102,6 +118,16 @@ public final class ContentRegistry {
 				} catch (IOException e) {
 					e.printStackTrace();
 					// TODO: handle error
+				}
+			else if(name.endsWith(".png"))
+				try(InputStream i = jar.getInputStream(entry)) {
+					addImageSource(name, i);
+				} catch (FileNotFoundException e) {
+					// TODO handle error
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+					// TODO handle error
 				}
 		});
 	}
