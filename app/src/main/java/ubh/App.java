@@ -4,29 +4,28 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.jar.JarFile;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
 import ubh.math.Vector2;
-import ubh.entity.Affiliation;
-import ubh.entity.Ship;
-import ubh.entity.ai.*;
+import ubh.level.Level;
 import ubh.loader.ContentRegistry;
-import ubh.math.AABB;
-import ubh.math.ReferenceFrame;
 import ubh.ui.UserInput;
 
 public final class App extends WindowAdapter implements AutoCloseable {
 	
     public static void main(String[] args) {
+    	/* Enable Java2D's OpenGL pipeline.
+    	 * This dramatically improves performance and should work on any system
+    	 * with non-ancient OpenGL implementation.
+    	 */
+    	System.getProperties().put("sun.java2d.opengl", "true");  
     	try(final var app = new App(1280,720)) {
     		app.run();
     	}
@@ -39,8 +38,8 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	private final JFrame frame;
 	private final CoordinateTransform transform = new CoordinateTransform();
 	private final UserInput userInput = new UserInput(transform);
-	private final PlayerAI playerAI = new PlayerAI(userInput);
 	private static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
+	private final Game game = new Game();
 	
 	static {
 		/* Try to find all .hjson resource files and add them to REGISTRY */
@@ -60,7 +59,6 @@ public final class App extends WindowAdapter implements AutoCloseable {
 		REGISTRY.registerDefault(BufferedImage.class, REGISTRY.load(BufferedImage.class, "ohno.png"));
 	}
 	
-	private static final Ship SHIP = REGISTRY.load(Ship.class, "example_ship");
 	
     private App(int width, int height) {
     	// Setup window
@@ -74,43 +72,13 @@ public final class App extends WindowAdapter implements AutoCloseable {
         frame.addMouseMotionListener(userInput);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
-        battlefield = new Battlefield(AABB.centered(Vector2.ZERO, new Vector2(WORLD_HEIGHT, WORLD_HEIGHT/2)));
-        var playerShipEntity = SHIP.createEntity(new ReferenceFrame(Vector2.ZERO, Vector2.ZERO, Vector2.UNIT_Y), Affiliation.FRIENDLY);
-        playerShipEntity.setAI(playerAI);
-        battlefield.spawn(playerShipEntity, 0);
-        
-        for(int i=0; i<5; ++i) {
-        	var enemyShip = SHIP.createEntity(
-        		new ReferenceFrame(
-	        		new Vector2(
-	        			((float) Math.random() - 0.5f)*WORLD_HEIGHT, 
-	        			WORLD_HEIGHT/2*(float) Math.random()
-	        		),
-	        		Vector2.ZERO,
-	        		Vector2.UNIT_Y.mul(-1)
-	        	),
-        		Affiliation.ENEMY
-        	);
-        	battlefield.spawn(enemyShip, 0);
-        }
-    }
-    
-    private Battlefield battlefield;
-    
-    /** Draws game objects, UI, etc.
-     * @param g Graphics object used for rendering.
-     */
-    private void draw(UBHGraphics g) {
-    	g.clear(Color.BLACK);
-    	battlefield.draw(g);
+        game.setUserInput(userInput);
     }
     
     @Override
     public void close() {
     	frame.dispose();
     }
-    
-    float t = 0;
     
     /** Runs the main loop of the game. */
     private void run() {
@@ -121,10 +89,11 @@ public final class App extends WindowAdapter implements AutoCloseable {
         
         var lastFrameTime = 1/60f;
         
+        game.start(REGISTRY.load(Level.class, "example_level"));
+        
         while(windowAlive) {
         	final var frameStartTimeMs = System.currentTimeMillis();
         	final var deltaT = Math.min(lastFrameTime, MAX_DELTA_T);
-        	t += deltaT;
         	
         	final var frameSize = frame.getSize();
             final float 
@@ -133,9 +102,10 @@ public final class App extends WindowAdapter implements AutoCloseable {
             transform.setWorldSize(new Vector2(worldWidth, WORLD_HEIGHT));
             transform.setWindowSize(frameSize);
             
-            battlefield.update(deltaT);
+            game.update(deltaT);
             try(final var graphics = new UBHGraphics((Graphics2D) bufferStrategy.getDrawGraphics(), transform)) {
-            	draw(graphics);
+            	graphics.clear(Color.DARK_GRAY);
+            	game.draw(graphics);
             }
             
         	bufferStrategy.show();

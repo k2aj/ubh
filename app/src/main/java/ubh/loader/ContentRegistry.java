@@ -21,6 +21,8 @@ import org.hjson.JsonValue;
 import ubh.attack.*;
 import ubh.entity.*;
 import ubh.entity.ai.*;
+import ubh.level.Level;
+import ubh.level.Wave;
 import ubh.math.*;
 
 /** {@code ContentRegistry} is responsible for loading various types of game content. */
@@ -111,7 +113,7 @@ public final class ContentRegistry {
 	
 	public void addSource(JarFile jar) {
 		jar.entries().asIterator().forEachRemaining(entry -> {
-			var name = entry.getName().toLowerCase();
+			var name = new File(entry.getName()).getName().toLowerCase();
 			if(name.endsWith(".hjson") || name.endsWith(".json"))
 				try {
 					addHjsonSource(jar.getInputStream(entry));
@@ -343,6 +345,14 @@ public final class ContentRegistry {
 		registry.registerLoader("Ship", Ship::fromJson);
 		registry.registerDefault(AI.class, AI.NULL);
 		registry.register("boss", BossAI.getInstance());
+		
+		// ubh.level
+		registry.registerLoader(Level.class, Level::new);
+		registry.registerLoader("Level", Level::new);
+		
+		registry.registerDefault(Wave.class, Wave.EMPTY);
+		registry.registerLoader(Wave.class, Wave::new);
+		registry.registerLoader("Wave", Wave::new);
 		
 		return registry;
 	}

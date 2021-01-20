@@ -6,7 +6,12 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Stack;
 
+import ubh.math.AABB;
 import ubh.math.Rectangle;
 import ubh.math.Vector2;
 
@@ -154,6 +159,20 @@ public final class UBHGraphics implements AutoCloseable {
     public void clear(Color color) {
         graphics.setBackground(color);
         graphics.clearRect(0,0,transform.getWindowSize().width,transform.getWindowSize().height);
+    }
+    
+    public void setClip(Optional<AABB> area) {
+    	if(area.isEmpty()) {
+    		graphics.setClip(null);
+    	} else {
+    		var p = area.get().getPosition();
+    		var r = area.get().getRadii();
+    		int wx = transform.xToScreenSpace(p.x() - r.x()),
+    			wy = transform.yToScreenSpace(p.y()+r.y()),
+    			wwidth = transform.widthToScreenSpace(2*r.x()), 
+                wheight = transform.heightToScreenSpace(2*r.y());
+    		graphics.setClip(wx,wy,wwidth,wheight);
+    	}
     }
 
     @Override

@@ -1,0 +1,24 @@
+id: kraken
+type: Ship
+ai: boss
+hitbox: {
+	radius: 8
+}
+sprite: kraken.png
+spriteSize: [12, 12]
+
+deathAttack: {
+	type: Explosion
+	radius: 30
+	sprite: energy_ball_blue.png
+	spriteSize: [55, 55]
+}
+
+weapons: [
+	example_weapon
+	{
+		reloadRate: 20
+		attack: example_bullet
+		velocity: 120
+	}
+]
