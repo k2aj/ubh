@@ -87,9 +87,13 @@ public class Bullet extends AbstractProjectile {
 
 		@Override
 		public void draw(UBHGraphics g) {
-			g.setColor(color);
-			g.enableFill();
-			hitbox.draw(g);
+			if(sprite.isEmpty()) {
+				g.setColor(color);
+				g.enableFill();
+				hitbox.draw(g);
+			} else {
+				g.drawImage(sprite.get(), getPosition(), spriteRadii, getRotation());
+			}
 		}
 		
 		@Override

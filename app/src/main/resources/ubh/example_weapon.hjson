@@ -5,19 +5,24 @@ reloadTime: 0.5
 velocity: 50
 attack: {
 	type: Bullet
-	color: cyan
+	sprite: energy_ball_purple.png
+	spriteSize: [4, 4]
 	hitbox: {
 		radius: 1
 	}
 	maxLifetime: 1
 	lifetimeDepletedAttack: {
-		color: cyan
 		type: Beam
+		sprite: energy_ball_purple.png
+		spriteSize: [10, 10]
+		beamSprite: energy_beam_purple.png
+		//beamSpriteSize: [60, 5]
 		damage: 50
 		hitAttack: {
 			type: Explosion
 			radius: 5
-			color: cyan
+			sprite: energy_ball_purple.png
+			spriteSize: [10, 10]
 			damage: 5
 		}
 	}

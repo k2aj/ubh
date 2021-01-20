@@ -1,5 +1,8 @@
 package ubh.attack;
 
+import java.awt.image.BufferedImage;
+import java.util.Optional;
+
 import org.hjson.JsonValue;
 
 import ubh.Battlefield;
@@ -18,11 +21,15 @@ import ubh.math.Vector2;
 public class Beam extends AbstractProjectile {
 	
 	protected final float width, length;
+	protected final Optional<BufferedImage> beamSprite;
+	protected final Vector2 beamSpriteRadii;
 	
 	protected Beam(Builder<?> builder) {
 		super(builder);
 		width = builder.width;
 		length = builder.length;
+		beamSprite = builder.beamSprite;
+		beamSpriteRadii = builder.beamSpriteRadii.orElse(new Vector2(length*0.5f, width));
 	}
 	
 	@Override
@@ -33,6 +40,8 @@ public class Beam extends AbstractProjectile {
 	@SuppressWarnings("unchecked") 
     public static class Builder <This extends Builder<This>> extends AbstractProjectile.Builder<This> {
     	private float width = 2, length = 60;
+    	private Optional<BufferedImage> beamSprite = Optional.empty();
+    	private Optional<Vector2> beamSpriteRadii = Optional.empty();
     	{
     		pierce(50);
     		maxLifetime(0.5f);
@@ -51,11 +60,21 @@ public class Beam extends AbstractProjectile {
 			this.length = length;
 			return (This) this;
 		}
+		public This beamSprite(BufferedImage beamSprite) {
+			this.beamSprite = Optional.ofNullable(beamSprite);
+			return (This) this;
+		}
+		public This beamSpriteSize(Vector2 size) {
+			this.beamSpriteRadii = size == null ? Optional.empty() : Optional.of(size.div(2));
+			return (This) this;
+		}
 		@Override
 		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
 				case "width": width(json.asFloat()); break;
 				case "length": length(json.asFloat()); break;
+				case "beamSprite": beamSprite(registry.load(BufferedImage.class, json)); break;
+				case "beamSpriteSize": beamSpriteSize(registry.load(Vector2.class, json)); break;
 				default: super.loadFieldFromJson(field, registry, json);
 			}
 		}
@@ -73,18 +92,34 @@ public class Beam extends AbstractProjectile {
 			super(referenceFrame, affiliation);
 			hitbox = new Rectangle(referenceFrame.getPosition(), Vector2.ZERO, referenceFrame.getRotation());
 		}
+	
+		private float lifetimeProgress() {
+			return lifetime / maxLifetime;
+		}
+		
+		private float currBeamRelativeRx() {
+			return lifetimeProgress();
+		}
+		
+		private float currBeamRx() {
+			return 0.5f*length*currBeamRelativeRx();
+		}
+		
+		private float currBeamRelativeRy() {
+			return Math.max(0, (1 - 2*Math.abs(lifetimeProgress()-0.5f)));
+		}
+		
+		private float currBeamRy() {
+			return currBeamRelativeRy() * 0.5f * width;
+		}
 		
 		@Override
 		public void update(Battlefield battlefield, float deltaT) {
 			super.update(battlefield, deltaT);
 			
 			// Update beam shape
-			float lifetimeProgress = lifetime / maxLifetime;
-			float currLength = length*lifetimeProgress;
-			float currWidth = Math.max(0, (1 - 2*Math.abs(lifetimeProgress-0.5f))*width);
-			
-			hitbox.setRadii(new Vector2(currLength/2, currWidth/2));
-			hitbox.setPosition(referenceFrame.getPosition().add(referenceFrame.getRotation().mul(currLength/2)));
+			hitbox.setRadii(new Vector2(currBeamRx(), currBeamRy()));
+			hitbox.setPosition(referenceFrame.getPosition().add(referenceFrame.getRotation().mul(currBeamRx())));
 		}
 		
 		@Override
@@ -96,8 +131,21 @@ public class Beam extends AbstractProjectile {
 		public void draw(UBHGraphics g) {
 			g.setColor(color);
 			g.enableFill();
-			hitbox.draw(g);
-			g.drawCircle(referenceFrame.getPosition(), hitbox.getRadii().y()*2);
+			if(beamSprite.isEmpty()) {
+				hitbox.draw(g);
+			} else {
+				g.drawImage(
+					beamSprite.get(), 
+					hitbox.getPosition(), 
+					beamSpriteRadii.mul(new Vector2(currBeamRelativeRx(), currBeamRelativeRy())), 
+					hitbox.getRotation()
+				);
+			}
+			if(sprite.isEmpty()) {
+				g.drawCircle(referenceFrame.getPosition(), currBeamRy()*2);
+			} else {
+				g.drawImage(sprite.get(), getPosition(), spriteRadii.mul(currBeamRelativeRy()), hitbox.getRotation());
+			}
 		}
 	}
 	

@@ -1,6 +1,8 @@
 package ubh.attack;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.util.Optional;
 
 import org.hjson.JsonValue;
 
@@ -23,6 +25,8 @@ public abstract class AbstractProjectile implements Attack {
 	protected final float damage, maxLifetime;
 	protected final int pierce;
 	protected final Color color;
+	protected final Optional<BufferedImage> sprite;
+	protected final Vector2 spriteRadii;
 	
 	protected final Attack 
 		hitAttack,
@@ -37,6 +41,8 @@ public abstract class AbstractProjectile implements Attack {
 		this.hitAttack = builder.hitAttack;
 		this.pierceDepletedAttack = builder.pierceDepletedAttack;
 		this.lifetimeDepletedAttack = builder.lifetimeDepletedAttack;
+		this.sprite = builder.sprite;
+		this.spriteRadii = builder.spriteRadii;
 	}
 
     @SuppressWarnings("unchecked") 
@@ -50,6 +56,8 @@ public abstract class AbstractProjectile implements Attack {
 			hitAttack = Attack.NULL,
 			pierceDepletedAttack = Attack.NULL,
 			lifetimeDepletedAttack = Attack.NULL;
+		private Optional<BufferedImage> sprite = Optional.empty();
+    	private Vector2 spriteRadii = new Vector2(1,1);
 		
 		public abstract AbstractProjectile build();
 		
@@ -81,6 +89,15 @@ public abstract class AbstractProjectile implements Attack {
 			lifetimeDepletedAttack = attack;
 			return (This) this;
 		}
+		public This sprite(BufferedImage sprite) {
+    		this.sprite = Optional.ofNullable(sprite);
+    		return (This) this;
+    	}
+    	
+    	public This spriteSize(Vector2 size) {
+    		this.spriteRadii = size.div(2);
+    		return (This) this;
+    	}
 		@Override
 		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
@@ -91,6 +108,8 @@ public abstract class AbstractProjectile implements Attack {
 				case "hitAttack":   hitAttack(registry.load(Attack.class, json)); break;
 				case "pierceDepletedAttack": pierceDepletedAttack(registry.load(Attack.class, json)); break;
 				case "lifetimeDepletedAttack": lifetimeDepletedAttack(registry.load(Attack.class, json)); break;
+				case "sprite": sprite(registry.load(BufferedImage.class, json)); break;
+				case "spriteSize": spriteSize(registry.load(Vector2.class, json)); break;
 			}
 		}
     }

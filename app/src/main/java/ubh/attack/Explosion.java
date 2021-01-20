@@ -73,10 +73,14 @@ public class Explosion extends AbstractProjectile {
 		}
 
 		@Override
-		public void draw(UBHGraphics graphics) {
-			graphics.setColor(color);
-			graphics.enableFill();
-			hitbox.draw(graphics);
+		public void draw(UBHGraphics g) {
+			if(sprite.isEmpty()) {
+				g.setColor(color);
+				g.enableFill();
+				hitbox.draw(g);
+			} else {
+				g.drawImage(sprite.get(), getPosition(), spriteRadii.mul(hitbox.getRadius()/radius), getRotation());
+			}
 		}
 
 		@Override

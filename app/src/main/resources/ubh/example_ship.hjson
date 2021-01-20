@@ -10,7 +10,8 @@ spriteSize: [10, 10]
 deathAttack: {
 	type: Explosion
 	radius: 15
-	color: white
+	sprite: energy_ball_yellow.png
+	spriteSize: [40, 40]
 }
 
 weapons: [
