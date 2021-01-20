@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.jar.JarFile;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -31,13 +34,14 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	
 	private static final float 
 		MAX_DELTA_T = 1/20f,
-		WORLD_HEIGHT = 72;
+		WORLD_HEIGHT = 144;
 	
 	private final JFrame frame;
 	private final CoordinateTransform transform = new CoordinateTransform();
 	private final UserInput userInput = new UserInput(transform);
 	private final PlayerAI playerAI = new PlayerAI(userInput);
 	private static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
+	
 	static {
 		/* Try to find all .hjson resource files and add them to REGISTRY */
 		try {
@@ -57,6 +61,15 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	
 	private static final Ship SHIP = REGISTRY.load(Ship.class, "example_ship");
 	
+	private static final BufferedImage IMAGE;
+	static {
+		try {
+			IMAGE = ImageIO.read(App.class.getResourceAsStream("ohno.png"));
+		} catch (IOException ioe) {
+			throw new Error(ioe);
+		}
+	}
+	
     private App(int width, int height) {
     	// Setup window
     	frame = new JFrame();
@@ -69,7 +82,7 @@ public final class App extends WindowAdapter implements AutoCloseable {
         frame.addMouseMotionListener(userInput);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
-        battlefield = new Battlefield(AABB.centered(Vector2.ZERO, new Vector2(WORLD_HEIGHT*2, WORLD_HEIGHT)));
+        battlefield = new Battlefield(AABB.centered(Vector2.ZERO, new Vector2(WORLD_HEIGHT, WORLD_HEIGHT/2)));
         var playerShipEntity = SHIP.createEntity(new ReferenceFrame(Vector2.ZERO), Affiliation.FRIENDLY);
         playerShipEntity.setAI(playerAI);
         battlefield.spawn(playerShipEntity, 0);
@@ -77,8 +90,8 @@ public final class App extends WindowAdapter implements AutoCloseable {
         for(int i=0; i<5; ++i) {
         	var enemyShip = SHIP.createEntity(
         		new ReferenceFrame(new Vector2(
-        			((float) Math.random() - 0.5f)*2*WORLD_HEIGHT, 
-        			WORLD_HEIGHT*(float) Math.random())
+        			((float) Math.random() - 0.5f)*WORLD_HEIGHT, 
+        			WORLD_HEIGHT/2*(float) Math.random())
         		),
         		Affiliation.ENEMY
         	);
@@ -94,12 +107,15 @@ public final class App extends WindowAdapter implements AutoCloseable {
     private void draw(UBHGraphics g) {
     	g.clear(Color.BLACK);
     	battlefield.draw(g);
+    	g.drawImage(IMAGE, Vector2.ZERO, new Vector2(10, 5), Vector2.polar(t,1));
     }
     
     @Override
     public void close() {
     	frame.dispose();
     }
+    
+    float t = 0;
     
     /** Runs the main loop of the game. */
     private void run() {
@@ -113,6 +129,7 @@ public final class App extends WindowAdapter implements AutoCloseable {
         while(windowAlive) {
         	final var frameStartTimeMs = System.currentTimeMillis();
         	final var deltaT = Math.min(lastFrameTime, MAX_DELTA_T);
+        	t += deltaT;
         	
         	final var frameSize = frame.getSize();
             final float 

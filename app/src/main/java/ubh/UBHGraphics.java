@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
+import ubh.math.Rectangle;
 import ubh.math.Vector2;
 
 /** Wrapper for java.awt.Graphics2D 
@@ -123,6 +126,17 @@ public final class UBHGraphics implements AutoCloseable {
 	 */
     public void drawRotatedRect(Vector2 center, Vector2 radii, Vector2 dir) {
         drawRotatedRect(center.x(), center.y(), radii.x(), radii.y(), dir.x(), dir.y());
+    }
+    
+    public void drawImage(BufferedImage image, Vector2 center, Vector2 radii, Vector2 dir) {
+    	var xform = new AffineTransform();
+    	xform.translate(transform.xToScreenSpace(center.x()), transform.yToScreenSpace(center.y()));
+    	xform.rotate(dir.x(), -dir.y());
+    	var pRx = transform.widthToScreenSpace(radii.x());
+    	var pRy = transform.heightToScreenSpace(radii.y());
+    	xform.translate(-pRx, -pRy);
+    	xform.scale(2*pRx/(double)image.getWidth(), 2*pRy/(double)image.getHeight());
+    	graphics.drawImage(image, xform, null);
     }
 
     public void drawHpBar(Vector2 center, Vector2 radii, float padding, float hpPercentage) {

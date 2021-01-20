@@ -29,8 +29,8 @@ public class CoordinateTransform {
     	if(windowSize != null & worldSize != null) {
 	    	translationX = windowSize.width/2f;
 	        translationY = windowSize.height/2f;
-	        scaleX = windowSize.width/worldSize.x()/2;
-	        scaleY = -windowSize.height/worldSize.y()/2;
+	        scaleX = windowSize.width/worldSize.x();
+	        scaleY = -windowSize.height/worldSize.y();
     	}
     }
 	
