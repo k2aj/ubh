@@ -3,6 +3,7 @@ package ubh;
 import java.util.ArrayList;
 
 import ubh.entity.Entity;
+import ubh.math.AABB;
 import ubh.math.Shape;
 import ubh.math.Vector2;
 
@@ -56,6 +57,9 @@ public class Battlefield {
 	}
 	public boolean inBounds(Vector2 point) {
 		return bounds.contains(point);
+	}
+	public AABB getBoundingBox() {
+		return bounds.getBoundingBox();
 	}
 	public CollisionSystem getCollisionSystem() {
 		return collisionSystem;

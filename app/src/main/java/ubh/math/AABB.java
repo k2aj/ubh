@@ -80,6 +80,11 @@ public final class AABB implements Shape {
 	public void setPosition(Vector2 position) {
 		center = position;
 	}
+	
+	@Override
+	public AABB getBoundingBox() {
+		return deepCopy();
+	}
 
 	public void setRadii(Vector2 radii) {
 		if(radii.x() < 0 || radii.y() < 0)

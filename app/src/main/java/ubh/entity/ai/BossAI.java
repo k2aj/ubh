@@ -7,6 +7,7 @@ import ubh.entity.Affiliation;
 import ubh.entity.Living;
 import ubh.entity.Ship.Entity;
 import ubh.math.MathUtil;
+import ubh.math.Vector2;
 
 /** BossAI targets a random friendly entity and shoots at it until it dies.
  *  Then it switches to another random friendly entity.
@@ -25,10 +26,17 @@ public class BossAI implements AI {
 	private static final class State implements AI.State {
 		
 		private Optional<Living.Entity> target = Optional.empty();
+		private Optional<Vector2> flightTarget = Optional.empty();
 
 		@Override
 		public void update(Battlefield battlefield, float deltaT, Entity ship) {
 			if(!ship.isDead()) {
+				if(flightTarget.isEmpty()) {
+					var bbox = battlefield.getBoundingBox();
+					flightTarget = Optional.of(bbox.getPosition().add(new Vector2(0, bbox.getRadii().y()*0.5f)));
+				} else {
+					ship.flyTo(flightTarget.get());
+				}
 				if(ship.weaponCount() > 0) {
 					if(target.isEmpty() || target.get().isDead()) {
 						target = battlefield.getCollisionSystem().getRandomEntity(Affiliation.FRIENDLY);

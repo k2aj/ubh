@@ -125,6 +125,14 @@ public class Ship extends Living {
 			this.thrust = thrust;
 		}
 		
+		public void flyTo(Vector2 targetPosition) {
+			Vector2 displacementNeeded = targetPosition.sub(getPosition());
+			var dumbThrustEstimate = displacementNeeded.div(maxThrust.length()).mul(friction);
+			if(dumbThrustEstimate.length2() > 1)
+				dumbThrustEstimate = dumbThrustEstimate.normalize();
+			setThrust(dumbThrustEstimate);
+		}
+		
 		public int weaponCount() {
 			return weaponStates.size();
 		}

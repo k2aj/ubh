@@ -64,6 +64,11 @@ public final class Circle implements Shape {
 		this.radius = radius;
 	}
 	
+	@Override
+	public AABB getBoundingBox() {
+		return AABB.centered(center, new Vector2(radius,radius));
+	}
+	
 	public static Circle fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
 		float x=0, y=0, r=5;
 		for(var member : json.asObject()) {

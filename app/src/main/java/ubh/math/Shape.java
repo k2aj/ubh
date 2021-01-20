@@ -37,6 +37,8 @@ public interface Shape {
     /** @return Deep copy of this Shape. */
     public Shape deepCopy();
     
+    public AABB getBoundingBox();
+    
     public static Shape fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
     	for(var name : json.asObject().names()) {
     		if(name.equals("radius"))

@@ -81,7 +81,7 @@ public class Game {
 					nextWaveDelay += wave.getDuration();
 					wave.getAttack().attack(
 						battlefield, 
-						new ReferenceFrame(new Vector2(0, boundingBox.getRadii().y()), Vector2.ZERO, Vector2.UNIT_Y.mul(-1)), 
+						new ReferenceFrame(new Vector2(0, boundingBox.getRadii().y()*2), Vector2.ZERO, Vector2.UNIT_Y.mul(-1)), 
 						Affiliation.ENEMY, 
 						0
 					);

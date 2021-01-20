@@ -96,6 +96,10 @@ public final class Rectangle implements Shape {
     public Rectangle deepCopy() {
         return new Rectangle(bounds.getPosition(), bounds.getRadii(), rotation);
     }
+    @Override
+	public AABB getBoundingBox() {
+		return rotatedBoundingRectangle(Vector2.UNIT_X, Vector2.ZERO).bounds;
+	}
     public static Rectangle fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
     	float x=0, y=0, rx=5, ry=5, cos=1, sin=0;
 		for(var member : json.asObject()) {
