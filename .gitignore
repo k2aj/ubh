@@ -17,3 +17,6 @@ build
 .project
 .settings/
 app/bin/
+
+# GIMP image files because it can't save as PNG
+*.xcf

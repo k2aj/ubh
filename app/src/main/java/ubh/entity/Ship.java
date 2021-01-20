@@ -1,8 +1,10 @@
 package ubh.entity;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.hjson.JsonValue;
@@ -22,6 +24,8 @@ public class Ship extends Living {
 	protected final float friction;
 	protected final List<Weapon> weapons;
 	protected final AI ai;
+	protected final Optional<BufferedImage> sprite;
+	protected final Vector2 spriteRadii;
 	
 	protected Ship(Builder<?> builder) {
 		super(builder);
@@ -29,6 +33,8 @@ public class Ship extends Living {
 		this.friction = builder.friction;
 		this.weapons = new ArrayList<>(builder.weapons);
 		this.ai = builder.ai;
+		this.sprite = builder.sprite;
+		this.spriteRadii = builder.spriteRadii;
 	}
 	public static Builder<?> builder() {
         return new Builder<>();
@@ -40,6 +46,8 @@ public class Ship extends Living {
     	private float friction = 0.8f;
     	private List<Weapon> weapons = List.of();
     	private AI ai = AI.NULL;
+    	private Optional<BufferedImage> sprite = Optional.empty();
+    	private Vector2 spriteRadii = new Vector2(5,5);
     	
     	public This maxThrust(Vector2 maxThrust) {
     		this.maxThrust = maxThrust;
@@ -61,6 +69,16 @@ public class Ship extends Living {
     		return (This) this;
     	}
     	
+    	public This sprite(BufferedImage sprite) {
+    		this.sprite = Optional.ofNullable(sprite);
+    		return (This) this;
+    	}
+    	
+    	public This spriteSize(Vector2 size) {
+    		this.spriteRadii = size.div(2);
+    		return (This) this;
+    	}
+    	
     	@Override
 		public void loadFieldFromJson(String field, ContentRegistry registry, JsonValue json) throws ContentException {
 			switch(field) {
@@ -73,7 +91,9 @@ public class Ship extends Living {
 					);
 				break;
 				case "friction": friction(json.asFloat()); break;
-				case "ai": ai(registry.load(AI.class, json));
+				case "ai": ai(registry.load(AI.class, json)); break;
+				case "sprite": sprite(registry.load(BufferedImage.class, json)); break;
+				case "spriteSize": spriteSize(registry.load(Vector2.class, json)); break;
 				default: super.loadFieldFromJson(field, registry, json);
 			}
 		}
@@ -132,9 +152,13 @@ public class Ship extends Living {
 		
 		@Override
 		public void draw(UBHGraphics g) {
-			g.setColor(affiliation == Affiliation.FRIENDLY ? Color.green : Color.red);
-			g.enableFill();
-			hitbox.draw(g);
+			if(sprite.isEmpty()) {
+				g.setColor(affiliation == Affiliation.FRIENDLY ? Color.green : Color.red);
+				g.enableFill();
+				hitbox.draw(g);
+			} else {
+				g.drawImage(sprite.get(), hitbox.getPosition(), spriteRadii, getRotation());
+			}
 		}
     }
 

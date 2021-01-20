@@ -16,4 +16,10 @@ public abstract class LocalEntity extends Entity {
     public Vector2 getPosition() {
     	return referenceFrame.getPosition();
     }
+    public Vector2 getRotation() {
+    	return referenceFrame.getRotation();
+    }
+    public Vector2 getVelocity() {
+    	return referenceFrame.getVelocity();
+    }
 }

@@ -57,10 +57,10 @@ public final class App extends WindowAdapter implements AutoCloseable {
 		} catch (URISyntaxException | IOException e) {
 			throw new Error(e);
 		}
+		REGISTRY.registerDefault(BufferedImage.class, REGISTRY.load(BufferedImage.class, "ohno.png"));
 	}
 	
 	private static final Ship SHIP = REGISTRY.load(Ship.class, "example_ship");
-	private static final BufferedImage IMAGE = REGISTRY.load(BufferedImage.class, "ohno.png");
 	
     private App(int width, int height) {
     	// Setup window
@@ -75,16 +75,20 @@ public final class App extends WindowAdapter implements AutoCloseable {
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         
         battlefield = new Battlefield(AABB.centered(Vector2.ZERO, new Vector2(WORLD_HEIGHT, WORLD_HEIGHT/2)));
-        var playerShipEntity = SHIP.createEntity(new ReferenceFrame(Vector2.ZERO), Affiliation.FRIENDLY);
+        var playerShipEntity = SHIP.createEntity(new ReferenceFrame(Vector2.ZERO, Vector2.ZERO, Vector2.UNIT_Y), Affiliation.FRIENDLY);
         playerShipEntity.setAI(playerAI);
         battlefield.spawn(playerShipEntity, 0);
         
         for(int i=0; i<5; ++i) {
         	var enemyShip = SHIP.createEntity(
-        		new ReferenceFrame(new Vector2(
-        			((float) Math.random() - 0.5f)*WORLD_HEIGHT, 
-        			WORLD_HEIGHT/2*(float) Math.random())
-        		),
+        		new ReferenceFrame(
+	        		new Vector2(
+	        			((float) Math.random() - 0.5f)*WORLD_HEIGHT, 
+	        			WORLD_HEIGHT/2*(float) Math.random()
+	        		),
+	        		Vector2.ZERO,
+	        		Vector2.UNIT_Y.mul(-1)
+	        	),
         		Affiliation.ENEMY
         	);
         	battlefield.spawn(enemyShip, 0);
@@ -99,7 +103,6 @@ public final class App extends WindowAdapter implements AutoCloseable {
     private void draw(UBHGraphics g) {
     	g.clear(Color.BLACK);
     	battlefield.draw(g);
-    	g.drawImage(IMAGE, Vector2.ZERO, new Vector2(10, 5), Vector2.polar(t,1));
     }
     
     @Override

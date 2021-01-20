@@ -4,6 +4,8 @@ ai: boss
 hitbox: {
 	radius: 5
 }
+sprite: needle.png
+spriteSize: [10, 10]
 
 deathAttack: {
 	type: Explosion
