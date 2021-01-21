@@ -1,0 +1,41 @@
+Procedura weryfikacji wymagań systemowych
+
+0. Rozpakować plik test.zip. Plik powinien zawierać:
+   - ubh.jar (gotowy do użytku program)
+   - folder ubhcontent zawierający zawartość do testów:
+     - plik good_level.hjson zawierający poprawną definicję poziomu
+     - plik bad_level.hjson zawierający niepoprawną definicję poziomu
+     - plik good_level_bad_alien.hjson zawierający częściowo poprawną definicję poziomu
+       (niepoprawnie zdefiniowany statek przeciwnika)
+
+1. Uruchomić program ubh.jar. Do uruchomienia programu wymagana jest Java 11.
+   1.1 Po uruchomieniu programu powinno wyświetlić się menu główne.
+   
+2. Przejść do menu wyboru poziomów przy użyciu przycisku "Play".
+   2.1 Powinna wyświetlić się lista poziomów zawierająca poziomy good_level, bad_level oraz good_level_bad_alien
+   2.2 Poziom bad_level powinien wyświetlać się na czerwono, co sygnalizuje poważny błąd uniemożliwiający uruchomienie poziomu
+       Należy zweryfikować brak reakcji na klikanie myszką na nazwę tego poziomu.
+
+3. Uruchomić poziom good_level. Poziom można uruchomić przez kliknięcie myszką na nazwę poziomu w menu wyboru poziomów.
+   3.1 Powinno wyświetlić się tło poziomu
+   3.2 Po rozpoczęciu poziomu powinni zacząć pojawiać się przeciwnicy.
+   3.3 Należy zweryfikować możliwość poruszania statkiem, ograniczenie możliwości poruszania do krawędzi pola bitwy, możliwość spowalniania ruchu statku, celowania, strzelania oraz zmiany broni.
+       Instrukcje sterowania:
+       WSAD - poruszanie statkiem
+       Shift - spowolnienie ruchu
+       1-9 - wybór broni
+       mysz - celowanie i strzelanie (lewy przycisk)
+   3.4 Wstrzymać grę przy użyciu przycisku P
+   3.5 Zweryfikować możliwość otwarcia menu ustawień (przycisk "Settings") oraz możliwość powrotu z menu ustawień do rozgrywki (przycisk "Back")
+   3.6 Wznowić grę przez ponowne naciśnięcie przycisku P
+   3.7 Zweryfikować otrzymywanie obrażenia od pocisków przeciwników przez statek gracza.
+       Otrzymywanie obrażeń od pocisków powinno powodować zmniejszanie się paska punktów życia znajdującego się w prawym górnym rogu ekranu.
+   3.8 Pozwolić na zniszczenie statku gracza.
+   3.9 Powinna wyświetlić się informacja o przegranej oraz przycisk służący do restartowania poziomu.
+   3.10 Użyć przycisku do restartowania poziomu. Zweryfikować powrót pola walki do stanu początkowego (ta sama pozycja statku, napełniony pasek punktów życia, brak przeciwników na ekranie).
+   3.11 Zweryfikować możliwość niszczenia przeciwników przez pociski gracza. Część przeciwników powinna wystrzeliwywać dodatkowe pociski po zniszczeniu.
+   3.12 Po pokonaniu wszystkich fal kosmitów powininna się wyświetlić informacja o wygranej z możliwością powrotu do menu wyboru poziomów. 
+   
+4. Uruchomić poziom good_level_bad_alien.
+    4.1 Poziom nie powinien zawierać żadnych przeciwników (ponieważ był tak spreparowany że jedyny pojawiający się rodzaj przeciwnika to nieprawidłowy bad_alien).
+    4.2 Powinna pojawić się informacja o wygranej
