@@ -34,6 +34,13 @@ public class MultiAttack implements Attack {
 	}
 
 	public static MultiAttack fromJson(ContentRegistry registry, JsonValue json) throws ContentException {
-		return fromJsonArray(registry, json.asObject().get("attacks"));
+		if(json.isArray()) {
+			return fromJsonArray(registry, json.asObject().get("attacks"));
+		} else {
+			for(var member : json.asObject())
+				if(member.getName().equals("attacks"))
+					return fromJsonArray(registry, member.getValue());
+			throw new ContentException("Missing \"attacks\" member.");
+		}
 	}
 }

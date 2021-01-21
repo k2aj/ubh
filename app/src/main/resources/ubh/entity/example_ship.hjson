@@ -15,10 +15,22 @@ deathAttack: {
 }
 
 weapons: [
-	example_weapon
 	{
-		reloadRate: 20
-		attack: example_bullet
-		velocity: 120
+		fireRate: 20
+		maxAmmo: 10
+		reloadTime: 1
+		attack: gun_bullet
+		velocity: 60
+	}
+	{
+		reloadTime: 2
+		velocity: 30
+		attack: {
+			type: SpreadAttack
+			repeats: 5
+			spreadAngle: 75
+			spreadWeight: 1
+			attack: gun_bullet
+		}
 	}
 ]

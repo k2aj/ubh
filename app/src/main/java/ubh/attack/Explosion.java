@@ -32,7 +32,7 @@ public class Explosion extends AbstractProjectile {
     @SuppressWarnings("unchecked")
 	public static class Builder <This extends Builder<This>> extends AbstractProjectile.Builder<This> {
 		
-		private float radius;
+		private float radius = 1;
 		{
 			maxLifetime(0.2f);
 			pierce(50);

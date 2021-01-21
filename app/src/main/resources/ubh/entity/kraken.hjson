@@ -2,7 +2,7 @@ id: kraken
 type: Ship
 ai: boss
 hitbox: {
-	radius: 8
+	radius: 4
 }
 sprite: kraken.png
 spriteSize: [12, 12]
@@ -15,10 +15,66 @@ deathAttack: {
 }
 
 weapons: [
-	example_weapon
 	{
-		reloadRate: 20
-		attack: example_bullet
-		velocity: 120
+		maxAmmo: 3
+		fireRate: 10
+		reloadTime: 0.5
+		velocity: 40
+		attack: {
+			type: SpreadAttack
+			randomVelocityWeight: 0.2
+			randomRotationWeight: 0.4
+			attack: {
+				type: Bullet
+				sprite: energy_ball_blue.png
+				spriteSize: [4, 4]
+				hitbox: {
+					radius: 1
+				}
+				maxLifetime: 1
+				lifetimeDepletedAttack: {
+					type: Beam
+					sprite: energy_ball_blue.png
+					spriteSize: [10, 10]
+					beamSprite: energy_beam_blue.png
+					damage: 50
+					hitAttack: {
+						type: Explosion
+						radius: 5
+						sprite: energy_ball_blue.png
+						spriteSize: [10, 10]
+						damage: 5
+					}
+				}
+				damage: 10
+			}
+		}
 	}
+	{
+		maxAmmo: 10
+		fireRate: 15
+		reloadTime: 0.5
+		velocity: 80
+		attack: laser_bullet_blue
+	}
+	{
+		reloadTime: 1.5
+		attack: flak_bullet
+		velocity: 60
+	}
+	{
+		fireRate: 5
+		maxAmmo: 5
+		reloadTime: 2
+		velocity: 80
+		attack: {
+			type: SpreadAttack
+			repeats: 3
+			baseWeight: 0.5
+			spreadWeight: 0.5
+			spreadAngle: 40
+			attack: flak_bullet
+		}
+	}
+	
 ]

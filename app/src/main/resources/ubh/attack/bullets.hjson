@@ -1,0 +1,132 @@
+[
+	{
+		type: SpreadAttack
+		id: decorative_spark_yellow
+		baseWeight: 0
+		attack: {
+			type: Explosion
+			damage: 0
+			sprite: energy_ball_yellow.png
+			spriteSize: [5, 5]
+		}
+	}
+	{
+		type: SpreadAttack
+		id: decorative_spark_blue
+		baseWeight: 0
+		attack: {
+			type: Explosion
+			damage: 0
+			sprite: energy_ball_blue.png
+			spriteSize: [5, 5]
+		}
+	}
+	{
+		type: SpreadAttack
+		id: gun_bullet
+		randomWeight: 0.05
+		
+		attack: {
+			type: Bullet
+			
+			sprite: shell.png
+			spriteSize: [2, 1]
+			
+			damage: 10
+			hitbox: {
+				width: 2
+				height: 1
+			}
+			
+			hitAttack: decorative_spark_yellow
+		}
+	}
+	
+	{
+		type: Bullet
+		id: laser_bullet_blue
+			
+		sprite: energy_beam_blue.png
+		spriteSize: [4, 2]
+		
+		bouncy: true
+		pierce: 3
+		
+		damage: 20
+		hitbox: {
+			width: 4
+			height: 1
+		}
+		
+		hitAttack: decorative_spark_blue
+	}
+	
+	{
+		type: Bullet
+		id: shrapnel
+			
+		sprite: shrapnel.png
+		spriteSize: [3, 3]
+		
+		damage: 0
+		pierce: 999
+		maxLifetime: 0.2
+		
+		lifetimeDepletedAttack: {
+			type: Bullet
+			
+			sprite: shrapnel.png
+			spriteSize: [3, 3]
+			
+			damage: 20
+			hitbox: {
+				radius: 1
+			}
+			hitAttack: decorative_spark_yellow
+		}
+	}
+	
+	{
+		type: Bullet
+		id: flak_bullet
+		
+		sprite: shell.png
+		spriteSize: [4, 2]
+		damage: 0
+		maxLifetime: 1
+		hitbox: {
+			radius: 12.5
+		}
+		hitAttack: {
+			type: MultiAttack
+			id: flak_bullet_explosion
+			attacks: [
+				{
+					type: SpreadAttack 
+					baseWeight: 0
+					attack: {
+						type: Explosion
+						
+						sprite: energy_ball_yellow.png
+						spriteSize: [24, 24]
+						
+						damage: 50
+						radius: 15
+					}
+				}	
+				{
+					type: SpreadAttack
+					
+					baseWeight: 0.333
+					spreadWeight: 0.333
+					randomWeight: 0.333
+					spreadAngle: 360
+					
+					attack: shrapnel
+					repeats: 6
+				}
+			]
+		}
+		lifetimeDepletedAttack: flak_bullet_explosion
+	}
+]
