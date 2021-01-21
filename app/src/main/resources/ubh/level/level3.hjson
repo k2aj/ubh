@@ -1,0 +1,11 @@
+type: Level
+id: level3
+backgroundSprite: space.png
+backgroundScrollSpeed: -20
+battlefieldSize: [160, 120]
+playerShip: kraken
+waves: [
+	{
+		attack: nemesis_scout
+	}
+]

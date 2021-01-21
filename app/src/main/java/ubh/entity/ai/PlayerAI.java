@@ -18,14 +18,23 @@ public class PlayerAI implements AI {
 		
 		private Vector2 rawThrust = Vector2.ZERO, aimPos = Vector2.ZERO;
 		private int activeWeapon = 0, nextActiveWeapon = 0;
-		boolean weaponFiring = false;
+		private boolean weaponFiring = false;
+		private boolean slowMode = false;
 
 		@Override
 		public void update(Battlefield battlefield, float deltaT, Entity ship) {
 			if(!ship.isDead()) {
+				
+				var thrust = rawThrust.length2() == 0 ? Vector2.ZERO : rawThrust.normalize();
+				if(slowMode) thrust = thrust.div(3);
+				ship.setThrust(thrust);
+				
+				while(!battlefield.inBounds(ship.getPosition())) {
+					ship.setPosition(ship.getPosition().add(ship.getPosition().mul(-1).normalize()));
+				}
+				
 				if(nextActiveWeapon < ship.weaponCount())
 					activeWeapon = nextActiveWeapon;
-				ship.setThrust(rawThrust.length2() == 0 ? Vector2.ZERO : rawThrust.normalize());
 	    		if(weaponFiring)
 	    			ship.fireWeapon(battlefield, deltaT, activeWeapon, aimPos); 
 			}
@@ -41,6 +50,7 @@ public class PlayerAI implements AI {
 					nextActiveWeapon = i;
 			weaponFiring = userInput.isMouseButtonPressed(1);
 			aimPos = userInput.getCursorWorldPos();
+			slowMode = userInput.isShiftPressed();
 		}
 		
 	}

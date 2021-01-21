@@ -2,6 +2,7 @@ package ubh.ui;
 
 import java.awt.Color;
 
+import ubh.Alignment;
 import ubh.UBHGraphics;
 import ubh.math.Vector2;
 
@@ -31,6 +32,6 @@ public class SettingsGui extends GuiNotLeafNode {
 	public void draw(UBHGraphics g) {
 		super.draw(g);
 		g.setColor(Color.WHITE);
-		g.drawText(new Vector2(0, 2), "Settings");
+		g.drawText(new Vector2(0, 4), "Settings", Alignment.CENTER);
 	}
 }

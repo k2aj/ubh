@@ -23,6 +23,17 @@
 	}
 	{
 		type: SpreadAttack
+		id: decorative_spark_red
+		baseWeight: 0
+		attack: {
+			type: Explosion
+			damage: 0
+			sprite: energy_ball_red.png
+			spriteSize: [5, 5]
+		}
+	}
+	{
+		type: SpreadAttack
 		id: gun_bullet
 		randomWeight: 0.05
 		
@@ -44,7 +55,7 @@
 	
 	{
 		type: Bullet
-		id: laser_bullet_blue
+		id: ion_bullet
 			
 		sprite: energy_beam_blue.png
 		spriteSize: [4, 2]
@@ -59,6 +70,24 @@
 		}
 		
 		hitAttack: decorative_spark_blue
+	}
+	
+	{
+		type: Bullet
+		id: laser_bullet
+			
+		sprite: energy_beam_red.png
+		spriteSize: [4, 2]
+		
+		pierce: 3
+		
+		damage: 20
+		hitbox: {
+			width: 4
+			height: 1
+		}
+		
+		hitAttack: decorative_spark_red
 	}
 	
 	{
@@ -95,7 +124,8 @@
 		damage: 0
 		maxLifetime: 1
 		hitbox: {
-			radius: 12.5
+			width: 4
+			height: 2
 		}
 		hitAttack: {
 			type: MultiAttack

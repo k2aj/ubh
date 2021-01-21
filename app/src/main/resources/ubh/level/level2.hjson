@@ -1,0 +1,40 @@
+type: Level
+id: level2
+backgroundSprite: mars.png
+backgroundScrollSpeed: -35
+battlefieldSize: [240, 160]
+playerShip: f1337
+waves: [
+	{	
+		id: level2_octopus_wave
+		duration: 10
+		attack: alien_octopus
+		count: 7
+	}
+	{
+		id: level2_snail_wave
+		duration: 10
+		attack: alien_snail
+		count: 20
+	}
+	level2_snail_wave
+	level2_octopus_wave
+	{
+		id: level2_eye_wave
+		attack: alien_eye
+		count: 3
+	}
+	level2_snail_wave
+	level2_snail_wave
+	level2_snail_wave
+	{
+		attack: alien_eye
+	}
+	level2_octopus_wave
+	level2_snail_wave
+	level2_octopus_wave
+	level2_eye_wave
+	level2_octopus_wave
+	level2_eye_wave
+	level2_eye_wave
+]

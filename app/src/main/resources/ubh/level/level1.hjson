@@ -1,0 +1,29 @@
+type: Level
+id: level1
+backgroundSprite: blue_sky.png
+backgroundScrollSpeed: -45
+battlefieldSize: [160, 120]
+playerShip: kraken
+waves: [
+	{	
+		id: level1_jet_wave
+		duration: 10
+		attack: jet_fighter
+		count: 3
+	}
+	{
+		id: level1_snail_wave
+		duration: 5
+		attack: alien_snail
+		count: 3
+	}
+	level1_jet_wave
+	level1_snail_wave
+	level1_snail_wave
+	level1_jet_wave
+	level1_jet_wave
+	level1_snail_wave
+	{
+		attack: f1337
+	}
+]

@@ -1,0 +1,57 @@
+type: Ship
+id: alien_eye
+hitbox: {
+	radius: 6
+}
+maxHealth: 1000
+maxThrust: [20, 20]
+sprite: alien_eye.png
+spriteSize: [18, 18]
+
+deathAttack: [
+	{
+		type: Explosion
+		radius: 40
+		sprite: energy_ball_red.png
+		spriteSize: [70, 70]
+	}
+	{
+		type: SpreadAttack
+		attack: eye_laser
+		randomWeight: 1
+		baseWeight: 1
+		repeats: 5
+	}
+]
+weapons: [
+	{
+		reloadTime: 2
+		velocity: 0
+		
+		attack: {
+			type: Beam
+			id: eye_laser
+			name: Eye Laser
+			maxLifetime: 1
+			sprite: energy_ball_red.png
+			spriteSize: [16, 16]
+			beamSprite: energy_beam_red.png
+			beamSpriteSize: [200, 8]
+			damage: 200
+			length: 200
+			width: 4
+			hitAttack: {
+				type: Explosion
+				radius: 5
+				sprite: energy_ball_red.png
+				spriteSize: [30, 30]
+				damage: 5
+			}
+		}
+	}
+]
+
+ai: [
+	fire_weapon_0
+	park_then_run
+]

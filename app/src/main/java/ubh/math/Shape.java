@@ -46,4 +46,9 @@ public interface Shape {
     	}
     	return Rectangle.fromJson(registry, json);
     }
+    
+    /**
+     * @return random point inside this shape
+     */
+    public Vector2 randomPoint();
 }

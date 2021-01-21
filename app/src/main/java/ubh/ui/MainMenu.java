@@ -3,6 +3,7 @@ package ubh.ui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import ubh.Alignment;
 import ubh.UBHGraphics;
 import ubh.math.Vector2;
 
@@ -27,7 +28,7 @@ public class MainMenu extends GuiNotLeafNode {
 
 	@Override
 	public void update(GuiContext ctx, float deltaT) {
-		if(btnPlay.isClicked()) ctx.open(GameGui.getInstance());
+		if(btnPlay.isClicked()) ctx.open(LevelSelectGui.getInstance());
 		else if(btnSettings.isClicked()) ctx.open(SettingsGui.getInstance());
 		else {
 			
@@ -38,6 +39,6 @@ public class MainMenu extends GuiNotLeafNode {
 	public void draw(UBHGraphics g) {
 		super.draw(g);
 		g.setColor(Color.WHITE);
-		g.drawText(new Vector2(0, 8), "Main menu");
+		g.drawText(new Vector2(0, 8), "Main menu", Alignment.CENTER);
 	}
 }

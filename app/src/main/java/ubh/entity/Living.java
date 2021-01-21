@@ -3,6 +3,7 @@ package ubh.entity;
 import ubh.math.Shape;
 import ubh.math.Vector2;
 import ubh.math.AABB;
+import ubh.math.Rectangle;
 import ubh.math.ReferenceFrame;
 
 import org.hjson.JsonValue;
@@ -102,10 +103,19 @@ public abstract class Living implements Attack {
 	    public void update(Battlefield battlefield, float deltaT) {
 	        super.update(battlefield, deltaT);
 	        hitbox.setPosition(referenceFrame.getPosition());
+	        if(hitbox instanceof Rectangle)
+	        	((Rectangle) hitbox).setRotation(referenceFrame.getRotation());
+	        if(health <= 0) die();
 	    }
+	    
+	    @Override
+		protected boolean inBounds(Battlefield battlefield) {
+			return battlefield.inBounds(hitbox);
+		}
 	
 	    public float damage(float amount) {
 	        health = Math.max(health-amount, 0);
+	        if(health <= 0) die();
 	        return amount;
 	    }
 	
@@ -123,11 +133,6 @@ public abstract class Living implements Attack {
 	    
 	    public Affiliation getAffiliation() {
 	    	return affiliation;
-	    }
-	
-	    @Override
-	    public boolean isDead() {
-	        return health <= 0;
 	    }
 	}
 }

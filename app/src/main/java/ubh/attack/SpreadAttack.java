@@ -50,7 +50,7 @@ public class SpreadAttack implements Attack {
 			var randomVector = Vector2.polar((float)(Math.random()*2*Math.PI), (float)(Math.random()));
 			float angle = 0;
 			if(count > 1)
-				angle = spreadAngle*(i/(float)(count-1)-0.5f);
+				angle = spreadAngle*(i/(float)(count)-0.5f);
 			
 			var vRandom = vBase.scaleRotate(randomVector);
 			var rRandom = rBase.scaleRotate(randomVector);

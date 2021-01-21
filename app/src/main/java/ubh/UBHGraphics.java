@@ -185,8 +185,15 @@ public final class UBHGraphics implements AutoCloseable {
     }
     
     // TODO: this is horribly broken and does not center text
-    public void drawText(Vector2 position, String text) {
-    	graphics.drawString(text, transform.xToScreenSpace(position.x()), transform.yToScreenSpace(position.y()));
+    public void drawText(Vector2 position, String text, Alignment alignment) {
+    	var fm = graphics.getFontMetrics();
+    	int xOffset = 0;
+    	switch(alignment) {
+    	case LEFT: xOffset = 0; break;
+    	case CENTER: xOffset = -fm.stringWidth(text)/2; break;
+    	case RIGHT: xOffset = -fm.stringWidth(text); break;
+    	}
+    	graphics.drawString(text, transform.xToScreenSpace(position.x()) + xOffset, transform.yToScreenSpace(position.y()));
     }
 
     @Override

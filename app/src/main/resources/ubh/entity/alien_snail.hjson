@@ -1,0 +1,19 @@
+type: Ship
+id: alien_snail
+hitbox: {
+	radius: 2
+}
+maxHealth: 100
+sprite: alien_snail.png
+spriteSize: [8, 4]
+
+deathAttack: {
+	type: Explosion
+	radius: 10
+	sprite: energy_ball_red.png
+	spriteSize: [20, 20]
+}
+
+weapons: []
+
+ai: park_then_run

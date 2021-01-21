@@ -3,6 +3,7 @@ package ubh.ui;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import ubh.Alignment;
 import ubh.UBHGraphics;
 import ubh.math.AABB;
 import ubh.math.Vector2;
@@ -12,6 +13,7 @@ public class Button implements GuiNode {
 	private AABB bounds = AABB.centered(Vector2.ZERO, new Vector2(12,3));
 	private Color color = Color.YELLOW;
 	private String text = "";
+	private Alignment alignment = Alignment.CENTER;
 	boolean clicked = false;
 
 	@Override
@@ -25,7 +27,7 @@ public class Button implements GuiNode {
 		g.setColor(color);
 		g.disableFill();
 		bounds.draw(g);
-		g.drawText(bounds.getPosition(), text);
+		g.drawText(bounds.getPosition(), text, alignment);
 	}
 	
 	public boolean isClicked() {
@@ -54,6 +56,10 @@ public class Button implements GuiNode {
 
 	public void setText(String text) {
 		this.text = text;
+	}
+	
+	public void setTextAlignment(Alignment alignment) {
+		this.alignment = alignment;
 	}
 
 }

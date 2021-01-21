@@ -13,6 +13,7 @@ public final class Weapon {
 	private final float reloadTime, fireTime, velocity, inheritVelocity;
 	private final int maxAmmo;
 	private final Attack attack;
+	private final String name;
 	
 	public Weapon(Builder builder) {
 		this.attack = builder.attack;
@@ -21,6 +22,7 @@ public final class Weapon {
         this.velocity = builder.velocity;
         this.maxAmmo = builder.maxAmmo;
         this.inheritVelocity = builder.inheritVelocity;
+        this.name = builder.name;
 	}
 	
 	public State createState() {
@@ -35,6 +37,7 @@ public final class Weapon {
         private Attack attack = Attack.NULL;
         private float reloadTime = 1, fireTime = 0.1f, velocity = 15, inheritVelocity = 1f;
         private int maxAmmo = 1;
+        private String name = "???";
         public Builder attack(Attack attack) {
             this.attack = attack;
             return this;
@@ -67,6 +70,10 @@ public final class Weapon {
             this.inheritVelocity = fraction;
             return this;
         }
+        public Builder name(String name) {
+        	this.name = name;
+        	return this;
+        }
         public Weapon build() {
             return new Weapon(this);
         }
@@ -81,6 +88,7 @@ public final class Weapon {
 			case "maxAmmo": maxAmmo(json.asInt()); break;
 			case "velocity": velocity(json.asFloat()); break;
 			case "inheritVelocity": inheritVelocity(json.asFloat()); break;
+			case "name": name(json.asString()); break;
 			}
 		}
     }
@@ -93,6 +101,8 @@ public final class Weapon {
         }
         public void update(float deltaT) {
             reloadLeft = Math.max(0, reloadLeft - deltaT);
+            if(reloadLeft == 0 && ammo == 0)
+            	ammo = maxAmmo;
         }
         public void fire(Battlefield battlefield, ReferenceFrame referenceFrame, Affiliation affiliation, float deltaT) {
             final var attackFrame = referenceFrame.deepCopy();
@@ -108,6 +118,21 @@ public final class Weapon {
                 else
                     reloadLeft += reloadTime;
             }
+        }
+        public String getName() {
+        	return name;
+        }
+        
+        public int getRemainingAmmo() {
+        	return ammo;
+        }
+        
+        public int getMaxAmmo() {
+        	return maxAmmo;
+        }
+        
+        public float getReloadProgress() {
+        	return 1 - reloadLeft / (ammo==0 ? reloadTime : fireTime);
         }
 	}
 

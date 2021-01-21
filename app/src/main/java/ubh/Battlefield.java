@@ -1,7 +1,9 @@
 package ubh;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 
+import ubh.entity.Affiliation;
 import ubh.entity.Entity;
 import ubh.math.AABB;
 import ubh.math.Shape;

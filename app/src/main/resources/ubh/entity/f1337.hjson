@@ -1,0 +1,34 @@
+id: f1337
+type: Ship
+hitbox: {
+	radius: 12
+}
+maxHealth: 10000
+sprite: f1337.png
+spriteSize: [24, 48]
+
+deathAttack: {
+	type: Explosion
+	radius: 30
+	sprite: energy_ball_blue.png
+	spriteSize: [55, 55]
+}
+
+weapons: [
+	machine_gun
+	flak_cannon
+	flakmeister
+]
+
+ai: [
+	park_boss
+	{
+		type: MultiAI
+		phased: true
+		ais: [
+			fire_weapon_0
+			fire_weapon_1
+			fire_weapon_2
+		]
+	}
+]

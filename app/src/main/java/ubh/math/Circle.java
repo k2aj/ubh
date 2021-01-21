@@ -91,4 +91,12 @@ public final class Circle implements Shape {
 		}
 		return new Circle(new Vector2(x,y),r);
 	}
+
+	@Override
+	public Vector2 randomPoint() {
+		while(true) {
+			var point = new Vector2((float)Math.random()*2-1, (float)Math.random()*2-1).mul(radius).add(center);
+			if(contains(point)) return point;
+		}
+	}
 }

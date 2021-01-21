@@ -57,6 +57,24 @@ public class Game {
 		waveProgress = 0;
 	}
 	
+	public void pause() {
+		if(state == GameState.RUNNING) state = GameState.PAUSED;
+		else throw new IllegalStateException(state.toString());
+	}
+	
+	public void resume() {
+		if(state == GameState.PAUSED) state = GameState.RUNNING;
+		else throw new IllegalStateException(state.toString());
+	}
+	
+	public Ship.Entity getPlayerShipEntity() {
+		return playerShipEntity;
+	}
+	
+	public Vector2 getBattlefieldRadii() {
+		return level.getBattlefieldRadii();
+	}
+	
 	public GameState getState() {
 		return state;
 	}
@@ -78,34 +96,36 @@ public class Game {
 	public void update(UserInput userInput, float deltaT) {
 		var oldWorldSize = userInput.getTransform().getWorldSize();
 		
-		switch(state) {
-		case RUNNING:
+		if(state == GameState.RUNNING) {
+			
 			userInput.getTransform().setWorldSize(getExtendedWorldSize(userInput.getTransform().getAspectRatio()));
 			playerAIState.input(userInput);
 			battlefield.update(deltaT);
 			
-			backgroundSpriteYOffset = mod(
-				backgroundSpriteYOffset + deltaT * level.getBackgroundScrollSpeed(), 
-				backgroundSpriteRadii.y()*2
-			);
+			if(level.getBackgroundSprite().isPresent()) {
+				backgroundSpriteYOffset = mod(
+					backgroundSpriteYOffset + deltaT * level.getBackgroundScrollSpeed(), 
+					backgroundSpriteRadii.y()*2
+				);
+			}
 			
 			if(waveProgress < level.getWaves().size()) {
 				// Try to spawn the next wave
 				nextWaveDelay = Math.max(0, nextWaveDelay - deltaT);
-				while(nextWaveDelay < deltaT) {
+				if(nextWaveDelay < deltaT) {
 					var wave = level.getWaves().get(waveProgress++);
+					wave.spawn(battlefield);
 					nextWaveDelay += wave.getDuration();
-					wave.getAttack().attack(
-						battlefield, 
-						new ReferenceFrame(new Vector2(0, boundingBox.getRadii().y()*2), Vector2.ZERO, Vector2.UNIT_Y.mul(-1)), 
-						Affiliation.ENEMY, 
-						0
-					);
 				}
+			} else { 
+				// all waves are gone
+				// if all enemies are gone too, then you win the level
+				if(battlefield.getCollisionSystem().getRandomEntity(Affiliation.ENEMY).isEmpty())
+					state = GameState.WON;
 			}
-			break;
-		default:
-			break;
+			// the game is lost if all friendly ships are dead
+			if(battlefield.getCollisionSystem().getRandomEntity(Affiliation.FRIENDLY).isEmpty())
+				state = GameState.LOST;
 		}
 		
 		userInput.getTransform().setWorldSize(oldWorldSize);

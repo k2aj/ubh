@@ -1,0 +1,102 @@
+[
+	{
+		type: Weapon
+		id: machine_gun
+		name: Machine Gun
+		fireRate: 20
+		maxAmmo: 10
+		reloadTime: 1
+		attack: gun_bullet
+		velocity: 60
+	}
+	{
+		type: Weapon
+		id: flak_cannon
+		name: Flak Cannon
+		reloadTime: 1.5
+		attack: flak_bullet
+		velocity: 60
+	}
+	{
+		type: Weapon
+		id: flakmeister
+		name: Flakmeister
+		fireRate: 5
+		maxAmmo: 5
+		reloadTime: 2
+		velocity: 80
+		attack: {
+			type: SpreadAttack
+			repeats: 3
+			baseWeight: 0.5
+			spreadWeight: 0.5
+			spreadAngle: 40
+			attack: flak_bullet
+		}
+	}
+	{
+		type: Weapon
+		id: shotgun
+		name: Shotgun
+		reloadTime: 2
+		velocity: 30
+		attack: {
+			type: SpreadAttack
+			repeats: 5
+			spreadAngle: 75
+			spreadWeight: 1
+			attack: gun_bullet
+		}
+	}
+	{
+		type: Weapon
+		id: ion_machine_gun
+		name: Ion Machine Gun
+		maxAmmo: 10
+		fireRate: 15
+		reloadTime: 0.5
+		velocity: 80
+		attack: ion_bullet
+	}
+	{
+		type: Weapon
+		id: ion_launcher
+		name: Ion Launcher
+		
+		maxAmmo: 3
+		fireRate: 10
+		reloadTime: 0.5
+		velocity: 30
+		attack: {
+			type: SpreadAttack
+			randomVelocityWeight: 0.2
+			randomRotationWeight: 0.4
+			attack: {
+				type: Bullet
+				sprite: energy_ball_blue.png
+				spriteSize: [4, 4]
+				damage: 0
+				pierce: 999
+				maxLifetime: 1.25
+				lifetimeDepletedAttack: {
+					type: Beam
+					id: ion_beam
+					sprite: energy_ball_blue.png
+					spriteSize: [8, 8]
+					beamSprite: energy_beam_blue.png
+					beamSpriteSize: [100, 4]
+					damage: 100
+					length: 100
+					width: 2
+					hitAttack: {
+						type: Explosion
+						radius: 5
+						sprite: energy_ball_blue.png
+						spriteSize: [10, 10]
+						damage: 5
+					}
+				}
+			}
+		}
+	}
+]

@@ -4,19 +4,19 @@ import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
 import org.hjson.JsonValue;
+import org.hjson.ParseException;
 
 import ubh.attack.*;
 import ubh.entity.*;
@@ -61,9 +61,24 @@ public final class ContentRegistry {
 		}
 	}
 	
+	public LoadingState getLoadingState(String id) {
+		return objectLoadingStates.get(id);
+	}
+	
+	public List<String> getIds(String typename) {
+		var result = new ArrayList<String>();
+		for(var entry : sourceIndex.entrySet()) {
+			if(entry.getValue().asObject().getString("type", "").equals(typename))
+				result.add(entry.getKey());
+		}
+		return result;
+	}
+	
 	public void addHjsonSource(InputStream source) throws IOException {
 		try(var reader = new BufferedReader(new InputStreamReader(source))) {
 			createIndexEntriesFor(JsonValue.readHjson(reader));
+		} catch (ParseException pe) {
+			// TODO: log malformed hjson file
 		}
 	}
 	
@@ -91,22 +106,14 @@ public final class ContentRegistry {
 			if(name.endsWith(".hjson") || name.endsWith(".json"))
 				try {
 					addHjsonSource(new FileInputStream(file));
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-					// TODO: handle error
 				} catch (IOException e) {
-					e.printStackTrace();
-					// TODO: handle error
+					// ignore bad file
 				}
 			else if(name.endsWith(".png"))
 				try(InputStream i = new FileInputStream(file)) {
 					addImageSource(name, i);
-				} catch (FileNotFoundException e) {
-					// TODO handle error
-					e.printStackTrace();
 				} catch (IOException e) {
-					e.printStackTrace();
-					// TODO handle error
+					// ignore bad file
 				}
 		}
 	}
@@ -118,18 +125,13 @@ public final class ContentRegistry {
 				try {
 					addHjsonSource(jar.getInputStream(entry));
 				} catch (IOException e) {
-					e.printStackTrace();
-					// TODO: handle error
+					throw new Error("Bad resource: "+name, e);
 				}
 			else if(name.endsWith(".png"))
 				try(InputStream i = jar.getInputStream(entry)) {
 					addImageSource(name, i);
-				} catch (FileNotFoundException e) {
-					// TODO handle error
-					e.printStackTrace();
 				} catch (IOException e) {
-					e.printStackTrace();
-					// TODO handle error
+					throw new Error("Bad resource: "+name,e);
 				}
 		});
 	}
@@ -224,42 +226,51 @@ public final class ContentRegistry {
 		
 		Object result = null;
 		
-		// If we got an unexpected string, then it's probably a named object id
-		if(json.isString() && clazz != String.class) {
-			var id = json.asString();
-			if(objectLoadingStates.containsKey(id))
-				return load(clazz, id);
-		}
+		try {
 		
-		// Try to use named loader
-		if(json.isObject()) {
-			final var obj = json.asObject();
-			final var type = obj.getString("type", null);
-			if(type != null) {
-				final var loader = namedLoaders.get(type);
-				if(loader != null) {
-					try {result = loader.load(this, json);}
-					catch (Exception e) {
-						// TODO: THIS IS HORRIBLE
-						// REPLACE IT WITH PROPER EXCEPTION HANDLING LATER
-						throw new RuntimeException(e);
-					}
+			// If we got an unexpected string, then it's probably a named object id
+			if(json.isString() && clazz != String.class) {
+				var id = json.asString();
+				if(objectLoadingStates.containsKey(id)) {
+					result = load(clazz, id);
 					if(!clazz.isInstance(result))
-						result = null;
+						throw new ContentException(
+							String.format(
+								"Expected %s, got \"%s\" of type %s", 
+								clazz.getName(), 
+								id, 
+								result.getClass().getName()
+							)
+						);
+						
+					return load(clazz, id);
 				}
 			}
-		}
-		// Try to use default loader
-		if(result == null) {
-			final var loader = defaultLoaders.get(clazz);
-			if(loader != null)
-				try {result = loader.load(this, json);}
-				catch (Exception e) {
-					// TODO: THIS IS HORRIBLE
-					// REPLACE IT WITH PROPER EXCEPTION HANDLING LATER
-					throw new RuntimeException(e);
+			
+			// Try to use named loader
+			if(json.isObject()) {
+				final var obj = json.asObject();
+				final var type = obj.getString("type", null);
+				if(type != null) {
+					final var loader = namedLoaders.get(type);
+					if(loader != null) {
+						result = loader.load(this, json);
+						if(!clazz.isInstance(result))
+							result = null;
+					}
 				}
+			}
+			// Try to use default loader
+			if(result == null) {
+				final var loader = defaultLoaders.get(clazz);
+				if(loader != null)
+					result = loader.load(this, json);
+			}
+		
+		} catch (Exception e) {
+			result = null;
 		}
+		
 		// Try to return the default object for that type
 		if(result == null)
 			result = defaultValues.get(clazz);
@@ -344,7 +355,10 @@ public final class ContentRegistry {
 		// ubh.entity
 		registry.registerLoader("Ship", Ship::fromJson);
 		registry.registerDefault(AI.class, AI.NULL);
-		registry.register("boss", BossAI.getInstance());
+		registry.registerLoader(AI.class, MultiAI::fromJson);
+		registry.registerLoader("MultiAI", MultiAI::fromJson);
+		registry.registerLoader("FlyingAI", FlyingAI::fromJson);
+		registry.registerLoader("WeaponAI", WeaponAI::fromJson);
 		
 		// ubh.level
 		registry.registerLoader(Level.class, Level::new);

@@ -91,4 +91,9 @@ public final class AABB implements Shape {
 			throw new IllegalArgumentException("Negative radii");
 		this.radii = radii;
 	}
+
+	@Override
+	public Vector2 randomPoint() {
+		return center.add(radii.mul(new Vector2((float)Math.random()*2-1, (float)Math.random()*2-1)));
+	}
 }

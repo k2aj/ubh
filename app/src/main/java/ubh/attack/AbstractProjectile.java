@@ -117,7 +117,6 @@ public abstract class AbstractProjectile implements Attack {
     public abstract class Entity extends LocalEntity implements Collider {
     	
     	protected final Affiliation affiliation;
-    	protected boolean outOfBounds = false;
     	protected float lifetime = 0;
     	protected int pierce;
     	private AutoCloseable collider;
@@ -133,6 +132,11 @@ public abstract class AbstractProjectile implements Attack {
 		@Override
 		public void onSpawned(Battlefield battlefield) {
 			collider = battlefield.getCollisionSystem().registerCollider(this, getHitbox(), affiliation);
+		}
+		
+		@Override
+		protected boolean inBounds(Battlefield battlefield) {
+			return battlefield.inBounds(getHitbox());
 		}
 		
 		@Override
@@ -159,8 +163,10 @@ public abstract class AbstractProjectile implements Attack {
 				hitAttack.attack(battlefield, hitAttackRframe, affiliation, 0);
 				if(pierce > 0) {
 					--pierce;
-					if(pierce == 0)
+					if(pierce == 0) {
 						pierceDepletedAttack.attack(battlefield, referenceFrame, affiliation, 0);
+						die();
+					}
 				}
 			}
 		}
@@ -168,14 +174,8 @@ public abstract class AbstractProjectile implements Attack {
 		@Override
 		public void update(Battlefield battlefield, float deltaT) {
 			super.update(battlefield, deltaT);
-			if(!battlefield.inBounds(getHitbox()))
-				outOfBounds = true;
 			lifetime += deltaT;
-		}
-
-		@Override
-		public boolean isDead() {
-			return outOfBounds || lifetime >= maxLifetime || pierce == 0;
+			if(lifetime >= maxLifetime || !inBounds(battlefield)) die();
 		}
     }
 }

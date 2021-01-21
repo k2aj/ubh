@@ -143,8 +143,16 @@ public class Ship extends Living {
 			weaponStates.get(weaponIndex).fire(battlefield, weaponRframe, affiliation, deltaT);
 		}
 		
+		public Weapon.State getWeapon(int index) {
+			return weaponStates.get(index);
+		}
+		
 		public void setAIState(AI.State aiState) {
 			this.aiState = aiState;
+		}
+		
+		public void setPosition(Vector2 position) {
+			referenceFrame.setPosition(position);
 		}
 		
 		@Override

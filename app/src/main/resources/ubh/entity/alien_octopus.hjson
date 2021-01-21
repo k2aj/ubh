@@ -1,0 +1,48 @@
+type: Ship
+id: alien_octopus
+hitbox: {
+	radius: 4
+}
+maxHealth: 500
+sprite: alien_octopus.png
+spriteSize: [12, 12]
+
+deathAttack: [
+	{
+		type: Explosion
+		radius: 30
+		sprite: energy_ball_red.png
+		spriteSize: [55, 55]
+	}
+	{
+		type: SpreadAttack
+		randomWeight: 1
+		baseWeight: 1
+		attack: alien_snail
+		repeats: 3
+	}
+]
+
+weapons: [
+	{
+		reloadTime: 2
+		fireRate: 5
+		maxAmmo: 3
+		velocity: 60
+		
+		attack: {
+			type: SpreadAttack
+			baseWeight: 0
+			spreadWeight: 1
+			spreadAngle: 60
+			
+			attack: laser_bullet
+			repeats: 3
+		}
+	}
+]
+
+ai: [
+	fire_weapon_0
+	park_then_run
+]

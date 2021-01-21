@@ -18,7 +18,8 @@ public class UserInput implements KeyListener, MouseInputListener {
 	private final CoordinateTransform transform = new CoordinateTransform();
     private Point cursorScreenPos = new Point(0,0);
     private Vector2 cursorWorldPos = Vector2.ZERO;
-    private final HashMap<Character,Boolean> keyboard = new HashMap<>();
+    private final HashMap<Character,Boolean> keyPressed = new HashMap<>();
+    private final HashMap<Character,Boolean> keyClicked = new HashMap<>();
     private boolean shiftPressed = false;
     private boolean[] mouseButtonPressed = new boolean[8];
     private boolean[] mouseButtonClicked = new boolean[8];
@@ -27,12 +28,21 @@ public class UserInput implements KeyListener, MouseInputListener {
     	return transform;
     }
     
+    public boolean isShiftPressed() {
+    	return shiftPressed;
+    }
+    
     public void update() {
     	Arrays.fill(mouseButtonClicked, false);
+    	keyClicked.replaceAll((k,v) -> false);
     }
     
 	public boolean isKeyPressed(char key) {
-		return keyboard.getOrDefault(key, false);
+		return keyPressed.getOrDefault(key, false);
+	}
+	
+	public boolean isKeyClicked(char key) {
+		return keyClicked.getOrDefault(key, false);
 	}
 	
 	public boolean isMouseButtonPressed(int index) {
@@ -53,12 +63,14 @@ public class UserInput implements KeyListener, MouseInputListener {
 
     @Override public void keyTyped(KeyEvent e) {}
     @Override public void keyPressed(KeyEvent e) {
-        keyboard.put(Character.toUpperCase(e.getKeyChar()), true);
+        keyPressed.put(Character.toUpperCase(e.getKeyChar()), true);
+        keyClicked.put(Character.toUpperCase(e.getKeyChar()), true);
         if(e.getKeyCode() == KeyEvent.VK_SHIFT)
             shiftPressed = true;
     }
     @Override public void keyReleased(KeyEvent e) {
-        keyboard.put(Character.toUpperCase(e.getKeyChar()), false);
+    	 keyPressed.put(Character.toUpperCase(e.getKeyChar()), false);
+         keyClicked.put(Character.toUpperCase(e.getKeyChar()), false);
         if(e.getKeyCode() == KeyEvent.VK_SHIFT)
             shiftPressed = false;
     }

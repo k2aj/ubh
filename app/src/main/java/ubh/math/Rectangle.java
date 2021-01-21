@@ -125,4 +125,9 @@ public final class Rectangle implements Shape {
 		}
 		return new Rectangle(new Vector2(x,y),new Vector2(rx,ry),new Vector2(cos,sin));
     }
+
+	@Override
+	public Vector2 randomPoint() {
+		return toWorldSpace(bounds.randomPoint());
+	}
 }

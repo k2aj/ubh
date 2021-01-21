@@ -1,0 +1,62 @@
+[
+    {
+        type: FlyingAI
+        id: park_boss
+        flightTarget: {
+            center: [0, 0.5]
+            radius: 0.1
+        }
+    }
+    {
+        type: FlyingAI
+        id: park_ship
+        flightTarget: {
+            center: [0, 0.5]
+            width: 1.75
+            height: 0.5
+        }
+    }
+    {
+        type: FlyingAI
+        id: go_below_battlefield
+        flightTarget: {
+            center: [0, -1.5]
+            width: 2
+            height: 0.5
+        }
+    }
+    {
+        type: FlyingAI
+        id: go_above_battlefield
+        flightTarget: above_battlefield
+    }
+    {
+    	type: WeaponAI
+    	id: fire_weapon_0
+    	weapons: [0]
+    }
+    {
+    	type: WeaponAI
+    	id: fire_weapon_1
+    	weapons: [1]
+    }
+    {
+    	type: WeaponAI
+    	id: fire_weapon_2
+    	weapons: [2]
+    }
+    {
+    	type: WeaponAI
+    	id: fire_all_weapons
+    	weapons: [0,1,2,3,4,5,6,7,8,9]
+    }
+    {
+		type: MultiAI
+		id: park_then_run
+		phased: true
+		ais: [
+			park_ship
+			go_below_battlefield
+		]
+    }
+]

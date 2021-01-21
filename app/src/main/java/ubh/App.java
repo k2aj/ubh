@@ -6,6 +6,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.jar.JarFile;
@@ -44,9 +45,15 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	
 	static {
 		/* Try to find all .hjson resource files and add them to REGISTRY */
+		File sourceCodeLocation;
 		try {
-			var sourceCodeLocation = new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			if(sourceCodeLocation.isFile() && sourceCodeLocation.getPath().endsWith(".jar")) {
+			sourceCodeLocation = new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+		} catch (URISyntaxException e) {
+			throw new Error("Failed to locate resources, was the JAR file modified?", e);
+		}
+		var isJar = sourceCodeLocation.isFile() && sourceCodeLocation.getPath().endsWith(".jar");
+		try {
+			if(isJar) {
 				// game was run from JAR file
 				var thisJarFile = new JarFile(sourceCodeLocation);
 				REGISTRY.addSource(thisJarFile);
@@ -54,10 +61,24 @@ public final class App extends WindowAdapter implements AutoCloseable {
 				// game was run from a regular folder containing compiled classes, probably by launching from an IDE?
 				REGISTRY.addSource(sourceCodeLocation);
 			}
-		} catch (URISyntaxException | IOException e) {
-			throw new Error(e);
+		} catch(IOException e) {
+			throw new Error("Failed load content sources, was the JAR file modified?", e);
 		}
-		REGISTRY.registerDefault(BufferedImage.class, REGISTRY.load(BufferedImage.class, "ohno.png"));
+		REGISTRY.registerDefault(BufferedImage.class, REGISTRY.load(BufferedImage.class, "badimage.png"));
+		
+		// Load user content
+		File userContentLocation = null;
+		if(isJar) 
+			userContentLocation = new File("ubhcontent");
+		else {
+			var directory = new File(sourceCodeLocation.getParent());
+			//System.out.println(directory);
+			for(var child : directory.listFiles())
+				if(child.getName().equals("ubhcontent") && child.isDirectory())
+					userContentLocation = child;
+		}
+		if(userContentLocation != null)
+			REGISTRY.addSource(userContentLocation);
 	}
 	
 	

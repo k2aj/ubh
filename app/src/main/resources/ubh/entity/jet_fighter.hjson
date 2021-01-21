@@ -1,26 +1,24 @@
-id: kraken
+id: jet_fighter
 type: Ship
-
 hitbox: {
 	radius: 4
 }
-maxHealth: 1000
-sprite: kraken.png
+maxHealth: 500
+sprite: jet_fighter.png
 spriteSize: [12, 12]
 
 deathAttack: {
 	type: Explosion
 	radius: 30
-	sprite: energy_ball_blue.png
+	sprite: energy_ball_yellow.png
 	spriteSize: [55, 55]
 }
 
 weapons: [
-	ion_machine_gun
-	ion_launcher
+	machine_gun
 ]
 
 ai: [
-	go_below_battlefield
 	fire_weapon_0
+	park_then_run
 ]
