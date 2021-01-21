@@ -1,5 +1,7 @@
 # UBH
 
+UBH is a small bullet hell game.
+
 ### Building
 UBH requires JDK 11 or higher to build and run.
 
