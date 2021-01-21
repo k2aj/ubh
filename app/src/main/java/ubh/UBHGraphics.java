@@ -2,6 +2,7 @@ package ubh;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
@@ -27,6 +28,10 @@ public final class UBHGraphics implements AutoCloseable {
     public UBHGraphics(Graphics2D graphics, CoordinateTransform transform) {
         this.graphics = graphics;
         this.transform = transform;
+    }
+    
+    public CoordinateTransform getTransform() {
+    	return transform;
     }
 
     /** Sets color used by future drawing operations. */
@@ -173,6 +178,15 @@ public final class UBHGraphics implements AutoCloseable {
                 wheight = transform.heightToScreenSpace(2*r.y());
     		graphics.setClip(wx,wy,wwidth,wheight);
     	}
+    }
+    
+    public void setFont(Font font) {
+    	graphics.setFont(font);
+    }
+    
+    // TODO: this is horribly broken and does not center text
+    public void drawText(Vector2 position, String text) {
+    	graphics.drawString(text, transform.xToScreenSpace(position.x()), transform.yToScreenSpace(position.y()));
     }
 
     @Override

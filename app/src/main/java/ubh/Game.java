@@ -19,18 +19,17 @@ public class Game {
 	private float nextWaveDelay;
 	private int waveProgress;
 	private Battlefield battlefield;
-	private UserInput userInput;
 	private Ship.Entity playerShipEntity;
+	private PlayerAI.State playerAIState;
 	private AABB boundingBox;
 	
 	private Vector2 backgroundSpriteRadii;
 	private int backgroundSpriteCount;
 	private float backgroundSpriteYOffset;
-	
-	public void setUserInput(UserInput userInput) {
-		this.userInput = userInput;
-		if(playerShipEntity != null)
-			playerShipEntity.setAI(new PlayerAI(userInput));
+		
+	private void installPlayerAI() {
+		playerAIState = PlayerAI.getInstance().createState();
+		playerShipEntity.setAIState(playerAIState);
 	}
 	
 	public void start(Level level) {
@@ -50,8 +49,7 @@ public class Game {
 			new ReferenceFrame(Vector2.ZERO, Vector2.ZERO, Vector2.UNIT_Y), 
 			Affiliation.FRIENDLY
 		);
-		if(userInput != null)
-			playerShipEntity.setAI(new PlayerAI(userInput));
+		installPlayerAI();
 		battlefield.spawn(playerShipEntity, 0);
 		
 		state = GameState.RUNNING;
@@ -59,13 +57,31 @@ public class Game {
 		waveProgress = 0;
 	}
 	
-	float mod(float a, float b) {
+	public GameState getState() {
+		return state;
+	}
+	
+	private static float mod(float a, float b) {
 		return (a%b+b)%b;
 	}
 	
-	public void update(float deltaT) {
+	private Vector2 getExtendedWorldSize(float aspectRatio) {
+		
+		float battlefieldAspectRatio = level.getBattlefieldRadii().x() / level.getBattlefieldRadii().y();
+		
+		if(aspectRatio >= battlefieldAspectRatio)
+			return level.getBattlefieldRadii().mul(new Vector2(2*aspectRatio/battlefieldAspectRatio, 2));
+		else
+			return level.getBattlefieldRadii().mul(new Vector2(2, 2/aspectRatio*battlefieldAspectRatio));
+	}
+	
+	public void update(UserInput userInput, float deltaT) {
+		var oldWorldSize = userInput.getTransform().getWorldSize();
+		
 		switch(state) {
 		case RUNNING:
+			userInput.getTransform().setWorldSize(getExtendedWorldSize(userInput.getTransform().getAspectRatio()));
+			playerAIState.input(userInput);
 			battlefield.update(deltaT);
 			
 			backgroundSpriteYOffset = mod(
@@ -91,21 +107,31 @@ public class Game {
 		default:
 			break;
 		}
+		
+		userInput.getTransform().setWorldSize(oldWorldSize);
 	}
 	
 	public void draw(UBHGraphics g) {
-		g.setClip(Optional.of(boundingBox));
-		
-		g.enableFill();
-		g.drawCenteredRect(Vector2.ZERO, level.getBattlefieldRadii());
-		level.getBackgroundSprite().ifPresent(background -> {
-			for(int i=0; i<backgroundSpriteCount; ++i) {
-				g.drawImage(background, new Vector2(0, backgroundSpriteYOffset+2*(i-1)*backgroundSpriteRadii.y()), backgroundSpriteRadii, Vector2.UNIT_X);
-			}
-		});
-		
-		battlefield.draw(g);
-		
-		g.setClip(Optional.empty());
+	
+		if(state != GameState.INIT) {
+				
+			var oldWorldSize = g.getTransform().getWorldSize();
+			g.getTransform().setWorldSize(getExtendedWorldSize(g.getTransform().getAspectRatio()));
+				
+			g.setClip(Optional.of(boundingBox));
+			g.enableFill();
+			g.setColor(level.getBackgroundColor());
+			g.drawCenteredRect(Vector2.ZERO, level.getBattlefieldRadii());
+			level.getBackgroundSprite().ifPresent(background -> {
+				for(int i=0; i<backgroundSpriteCount; ++i) {
+					g.drawImage(background, new Vector2(0, backgroundSpriteYOffset+2*(i-1)*backgroundSpriteRadii.y()), backgroundSpriteRadii, Vector2.UNIT_X);
+				}
+			});
+			
+			battlefield.draw(g);
+			
+			g.setClip(Optional.empty());
+			g.getTransform().setWorldSize(oldWorldSize);
+		}
 	}
 }

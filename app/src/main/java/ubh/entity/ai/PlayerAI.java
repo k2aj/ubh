@@ -6,37 +6,47 @@ import ubh.math.Vector2;
 import ubh.ui.UserInput;
 
 public class PlayerAI implements AI {
-
-	private final UserInput userInput;
 	
-	public PlayerAI(UserInput userInput) {
-		this.userInput = userInput;
+	private PlayerAI() {}
+	
+	private static final PlayerAI INSTANCE = new PlayerAI();
+	public static PlayerAI getInstance() {
+		return INSTANCE;
 	}
 	
-	private class State implements AI.State {
+	public class State implements AI.State {
 		
-		private int activeWeapon = 0;
+		private Vector2 rawThrust = Vector2.ZERO, aimPos = Vector2.ZERO;
+		private int activeWeapon = 0, nextActiveWeapon = 0;
+		boolean weaponFiring = false;
 
 		@Override
 		public void update(Battlefield battlefield, float deltaT, Entity ship) {
 			if(!ship.isDead()) {
-				final var thrust = new Vector2(
-		            (userInput.isKeyPressed('D') ? 1 : 0) + (userInput.isKeyPressed('A') ? -1 : 0),
-		            (userInput.isKeyPressed('W') ? 1 : 0) + (userInput.isKeyPressed('S') ? -1 : 0)
-	            );
-				for(int weapon=0; weapon < ship.weaponCount(); ++weapon)
-					if(userInput.isKeyPressed((char)('1'+weapon)))
-						activeWeapon = weapon;
-				ship.setThrust(thrust.length2() == 0 ? Vector2.ZERO : thrust.normalize());
-	    		if(userInput.isMouseButtonPressed(1))
-	    			ship.fireWeapon(battlefield, deltaT, activeWeapon, userInput.getCursorWorldPos()); 
+				if(nextActiveWeapon < ship.weaponCount())
+					activeWeapon = nextActiveWeapon;
+				ship.setThrust(rawThrust.length2() == 0 ? Vector2.ZERO : rawThrust.normalize());
+	    		if(weaponFiring)
+	    			ship.fireWeapon(battlefield, deltaT, activeWeapon, aimPos); 
 			}
+		}
+		
+		public void input(UserInput userInput) {
+			rawThrust = new Vector2(
+	            (userInput.isKeyPressed('D') ? 1 : 0) + (userInput.isKeyPressed('A') ? -1 : 0),
+	            (userInput.isKeyPressed('W') ? 1 : 0) + (userInput.isKeyPressed('S') ? -1 : 0)
+	        );
+			for(int i=0; i<9; ++i)
+				if(userInput.isKeyPressed((char)('1'+i)))
+					nextActiveWeapon = i;
+			weaponFiring = userInput.isMouseButtonPressed(1);
+			aimPos = userInput.getCursorWorldPos();
 		}
 		
 	}
 	
 	@Override
-	public AI.State createState() {
+	public State createState() {
 		return new State();
 	}
 

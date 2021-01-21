@@ -16,7 +16,7 @@ import javax.swing.WindowConstants;
 import ubh.math.Vector2;
 import ubh.level.Level;
 import ubh.loader.ContentRegistry;
-import ubh.ui.UserInput;
+import ubh.ui.*;
 
 public final class App extends WindowAdapter implements AutoCloseable {
 	
@@ -37,9 +37,10 @@ public final class App extends WindowAdapter implements AutoCloseable {
 	
 	private final JFrame frame;
 	private final CoordinateTransform transform = new CoordinateTransform();
-	private final UserInput userInput = new UserInput(transform);
-	private static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
-	private final Game game = new Game();
+	private final UserInput userInput = new UserInput();
+	private final GuiContext gui = new GuiContext(MainMenu.getInstance(), userInput);
+	
+	public static final ContentRegistry REGISTRY = ContentRegistry.createDefault();
 	
 	static {
 		/* Try to find all .hjson resource files and add them to REGISTRY */
@@ -71,8 +72,6 @@ public final class App extends WindowAdapter implements AutoCloseable {
         frame.addMouseListener(userInput);
         frame.addMouseMotionListener(userInput);
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        
-        game.setUserInput(userInput);
     }
     
     @Override
@@ -89,8 +88,6 @@ public final class App extends WindowAdapter implements AutoCloseable {
         
         var lastFrameTime = 1/60f;
         
-        game.start(REGISTRY.load(Level.class, "example_level"));
-        
         while(windowAlive) {
         	final var frameStartTimeMs = System.currentTimeMillis();
         	final var deltaT = Math.min(lastFrameTime, MAX_DELTA_T);
@@ -99,13 +96,17 @@ public final class App extends WindowAdapter implements AutoCloseable {
             final float 
                 aspectRatio = (float) (frameSize.getWidth() / frameSize.getHeight()), 
                 worldWidth = WORLD_HEIGHT * aspectRatio;
-            transform.setWorldSize(new Vector2(worldWidth, WORLD_HEIGHT));
-            transform.setWindowSize(frameSize);
             
-            game.update(deltaT);
+            transform.setWorldSize(new Vector2(worldWidth, WORLD_HEIGHT));
+            userInput.getTransform().setWorldSize(transform.getWorldSize());
+            transform.setWindowSize(frameSize);
+            userInput.getTransform().setWindowSize(frameSize);
+            
+            gui.update(deltaT);
+            userInput.update();
             try(final var graphics = new UBHGraphics((Graphics2D) bufferStrategy.getDrawGraphics(), transform)) {
             	graphics.clear(Color.DARK_GRAY);
-            	game.draw(graphics);
+            	gui.draw(graphics);
             }
             
         	bufferStrategy.show();

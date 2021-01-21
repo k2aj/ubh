@@ -16,9 +16,17 @@ public class CoordinateTransform {
     	tryUpdate();
     }
     
+    public Vector2 getWorldSize() {
+    	return worldSize;
+    }
+    
     public void setWindowSize(Dimension windowSize) {
     	this.windowSize = windowSize;
     	tryUpdate();
+    }
+    
+    public float getAspectRatio() {
+    	return windowSize.width / (float) windowSize.height;
     }
     
     public Dimension getWindowSize() {

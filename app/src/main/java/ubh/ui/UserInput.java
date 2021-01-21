@@ -1,9 +1,11 @@
 package ubh.ui;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import javax.swing.event.MouseInputListener;
@@ -13,15 +15,20 @@ import ubh.math.Vector2;
 
 public class UserInput implements KeyListener, MouseInputListener {
 	
-	private final CoordinateTransform transform;
+	private final CoordinateTransform transform = new CoordinateTransform();
     private Point cursorScreenPos = new Point(0,0);
     private Vector2 cursorWorldPos = Vector2.ZERO;
     private final HashMap<Character,Boolean> keyboard = new HashMap<>();
     private boolean shiftPressed = false;
     private boolean[] mouseButtonPressed = new boolean[8];
+    private boolean[] mouseButtonClicked = new boolean[8];
     
-    public UserInput(CoordinateTransform transform) {
-    	this.transform = transform;
+    public CoordinateTransform getTransform() {
+    	return transform;
+    }
+    
+    public void update() {
+    	Arrays.fill(mouseButtonClicked, false);
     }
     
 	public boolean isKeyPressed(char key) {
@@ -30,6 +37,10 @@ public class UserInput implements KeyListener, MouseInputListener {
 	
 	public boolean isMouseButtonPressed(int index) {
 		return mouseButtonPressed[index];
+	}
+	
+	public boolean isMouseButtonClicked(int index) {
+		return mouseButtonClicked[index];
 	}
 	
 	public Point getCursorScreenPos() {
@@ -54,8 +65,10 @@ public class UserInput implements KeyListener, MouseInputListener {
     @Override public void mouseClicked(MouseEvent e) {}
 	@Override public void mousePressed(MouseEvent e) {
         final var button = e.getButton();
-        if(button < mouseButtonPressed.length)
+        if(button < mouseButtonPressed.length) {
             mouseButtonPressed[button] = true;
+            mouseButtonClicked[button] = true;
+        }
         cursorScreenPos = e.getPoint();
         cursorWorldPos = transform.transformIntoWorldSpace(cursorScreenPos);
     }

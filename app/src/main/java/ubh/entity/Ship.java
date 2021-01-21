@@ -118,7 +118,7 @@ public class Ship extends Living {
 		protected Entity(ReferenceFrame referenceFrame, Affiliation affiliation) {
 			super(referenceFrame, affiliation);
 			weaponStates = weapons.stream().map(Weapon::createState).collect(Collectors.toList());
-			setAI(ai);
+			setAIState(ai.createState());
 		}
 		
 		public void setThrust(Vector2 thrust) {
@@ -143,8 +143,8 @@ public class Ship extends Living {
 			weaponStates.get(weaponIndex).fire(battlefield, weaponRframe, affiliation, deltaT);
 		}
 		
-		public void setAI(AI ai) {
-			aiState = ai.createState();
+		public void setAIState(AI.State aiState) {
+			this.aiState = aiState;
 		}
 		
 		@Override
